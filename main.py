@@ -19,13 +19,14 @@ class Example(QtGui.QMainWindow):
         self.setCentralWidget(self.main)
 
         self.figure = plt.figure()
-        img = mpimg.imread('nelicourvi.jpg')
-        plt.imshow(img)
+        self.img = mpimg.imread('nelicourvi.jpg')
+        plt.imshow(self.img)
 
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
 
         self.figure.canvas.mpl_connect('button_press_event', self.on_click)
+        self.figure.canvas.mpl_connect('motion_notify_event', self.on_move)
 
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -46,8 +47,10 @@ class Example(QtGui.QMainWindow):
         self.main.setLayout(layout)
 
     def on_click(self, event):
-        print('button={}, x={}, y={}, xdata={}, ydata={}'.format(
-            event.button, event.x, event.y, event.xdata, event.ydata))
+        print(self.img[event.ydata, event.xdata])
+
+    def on_move(self, event):
+        pass
 
 
 def main():
