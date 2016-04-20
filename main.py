@@ -3,6 +3,10 @@
 import sys
 
 from PyQt4 import QtGui
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 
 class Example(QtGui.QMainWindow):
@@ -11,15 +15,15 @@ class Example(QtGui.QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        pixmap = QtGui.QPixmap('nelicourvi.jpg')
+        self.main = QtGui.QWidget()
+        self.setCentralWidget(self.main)
 
-        label = QtGui.QLabel(self)
-        label.setPixmap(pixmap)
+        self.figure = plt.figure()
+        img = mpimg.imread('nelicourvi.jpg')
+        plt.imshow(img)
 
-        self.setCentralWidget(label)
-
-        QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
-        self.setToolTip('This is a <b>QWdiget</b> widget')
+        self.canvas = FigureCanvasQTAgg(self.figure)
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
 
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -32,22 +36,18 @@ class Example(QtGui.QMainWindow):
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAction)
 
-        self.setGeometry(300, 300, 250, 150)
-        self.center()
-        self.setWindowTitle('Icon')
+        self.setWindowTitle('BIRD')
 
-        self.show()
-
-    def center(self):
-        qr = self.frameGeometry()
-        cp = QtGui.QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.canvas)
+        layout.addWidget(self.toolbar)
+        self.main.setLayout(layout)
 
 
 def main():
     app = QtGui.QApplication(sys.argv)
     ex = Example()
+    ex.show()
     sys.exit(app.exec_())
 
 
