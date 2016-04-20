@@ -25,6 +25,8 @@ class Example(QtGui.QMainWindow):
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
 
+        self.figure.canvas.mpl_connect('button_press_event', self.on_click)
+
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
@@ -42,6 +44,10 @@ class Example(QtGui.QMainWindow):
         layout.addWidget(self.canvas)
         layout.addWidget(self.toolbar)
         self.main.setLayout(layout)
+
+    def on_click(self, event):
+        print('button={}, x={}, y={}, xdata={}, ydata={}'.format(
+            event.button, event.x, event.y, event.xdata, event.ydata))
 
 
 def main():
