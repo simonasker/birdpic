@@ -22,8 +22,11 @@ class Example(QtGui.QMainWindow):
         self.img = mpimg.imread('nelicourvi.jpg')
         plt.imshow(self.img)
 
+        self.rgb = [255, 255, 255]
+
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        self.render_area = RenderArea(self)
 
         self.figure.canvas.mpl_connect('button_press_event', self.on_click)
         self.figure.canvas.mpl_connect('motion_notify_event', self.on_move)
@@ -39,18 +42,34 @@ class Example(QtGui.QMainWindow):
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAction)
 
-        self.setWindowTitle('BIRD')
+        self.setWindowTitle('Untitled')
 
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.canvas)
         layout.addWidget(self.toolbar)
+        layout.addWidget(self.render_area)
         self.main.setLayout(layout)
 
     def on_click(self, event):
-        print(self.img[event.ydata, event.xdata])
+        self.rgb = list(self.img[int(event.ydata), int(event.xdata)])
+        self.repaint()
 
     def on_move(self, event):
         pass
+
+
+class RenderArea(QtGui.QWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.setMinimumHeight(100)
+
+    def paintEvent(self, event):
+        qp = QtGui.QPainter()
+        qp.begin(self)
+        color = QtGui.QColor(*self.parent.rgb)
+        qp.fillRect(0, 0, 100, 100, color)
+        qp.end()
 
 
 def main():
