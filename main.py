@@ -5,8 +5,13 @@ import sys
 from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+
+from skimage import io, segmentation, color
+
+COMPACTNESS = 35
+N_SEGMENTS = 200
+THRESHOLD = 30
 
 
 class Example(QtGui.QMainWindow):
@@ -19,8 +24,11 @@ class Example(QtGui.QMainWindow):
         self.setCentralWidget(self.main)
 
         self.figure = plt.figure()
-        self.img = mpimg.imread('nelicourvi.jpg')
-        plt.imshow(self.img)
+        self.img = io.imread('nelicourvi.jpg')
+        labels1 = segmentation.slic(
+            self.img, compactness=COMPACTNESS, n_segments=N_SEGMENTS)
+        out1 = color.label2rgb(labels1, self.img, kind='overlay')
+        plt.imshow(out1)
 
         self.rgb = [255, 255, 255]
 
