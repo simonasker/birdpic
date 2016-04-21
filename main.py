@@ -44,11 +44,15 @@ class Example(QtGui.QMainWindow):
 
         self.setWindowTitle('Untitled')
 
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.render_area)
-        self.main.setLayout(layout)
+        hbox = QtGui.QHBoxLayout()
+        vbox = QtGui.QVBoxLayout()
+
+        vbox.addWidget(self.canvas)
+        vbox.addWidget(self.toolbar)
+
+        hbox.addLayout(vbox)
+        hbox.addWidget(self.render_area)
+        self.main.setLayout(hbox)
 
     def on_click(self, event):
         self.rgb = list(self.img[int(event.ydata), int(event.xdata)])
@@ -62,7 +66,7 @@ class RenderArea(QtGui.QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setMinimumHeight(100)
+        self.setMinimumWidth(100)
 
     def paintEvent(self, event):
         qp = QtGui.QPainter()
