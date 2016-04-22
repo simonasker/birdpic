@@ -8,6 +8,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
 
 from skimage import io, segmentation, color
+import skimage.draw
 
 COMPACTNESS = 35
 N_SEGMENTS = 200
@@ -25,10 +26,12 @@ class Example(QtGui.QMainWindow):
 
         self.figure = plt.figure()
         self.img = io.imread('nelicourvi.jpg')
-        labels1 = segmentation.slic(
-            self.img, compactness=COMPACTNESS, n_segments=N_SEGMENTS)
-        out1 = color.label2rgb(labels1, self.img, kind='overlay')
-        plt.imshow(out1)
+        # labels1 = segmentation.slic(
+        #     self.img, compactness=COMPACTNESS, n_segments=N_SEGMENTS)
+        # out1 = color.label2rgb(labels1, self.img, kind='overlay')
+        # rr, cc = skimage.draw.circle(100, 100, 50)
+        # out1[rr, cc] = [0, 0, 0]
+        plt.imshow(self.img)
 
         self.rgb = [255, 255, 255]
 
@@ -64,7 +67,8 @@ class Example(QtGui.QMainWindow):
 
     def on_click(self, event):
         self.rgb = list(self.img[int(event.ydata), int(event.xdata)])
-        self.repaint()
+        rr, cc = skimage.draw.circle(event.xdata, event.ydata, 3)
+        print(self.img[cc, rr])
 
     def on_move(self, event):
         pass
@@ -79,8 +83,8 @@ class RenderArea(QtGui.QWidget):
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
-        color = QtGui.QColor(*self.parent.rgb)
-        qp.fillRect(0, 0, 100, 100, color)
+        col = QtGui.QColor(*self.parent.rgb)
+        qp.fillRect(0, 0, 100, 100, col)
         qp.end()
 
 
