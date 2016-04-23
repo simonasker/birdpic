@@ -18,15 +18,25 @@ THRESHOLD = 30
 class Cursor(object):
     def __init__(self, ax):
         self.ax = ax
-        self.lx = ax.axhline(color='k')
-        self.ly = ax.axvline(color='k')
+
+        color = 'black'
+        self.lx1 = ax.axhline(color=color)
+        self.lx2 = ax.axhline(color=color)
+
+        self.ly1 = ax.axvline(color=color)
+        self.ly2 = ax.axvline(color=color)
 
     def mouse_move(self, event):
         if not event.inaxes:
             return
+        size = 40
         x, y = event.xdata, event.ydata
-        self.lx.set_ydata(y)
-        self.ly.set_xdata(x)
+
+        self.lx1.set_ydata(y - size / 2.0)
+        self.lx2.set_ydata(y + size / 2.0)
+
+        self.ly1.set_xdata(x - size / 2.0)
+        self.ly2.set_xdata(x + size / 2.0)
 
 
 class Example(QtGui.QMainWindow):
