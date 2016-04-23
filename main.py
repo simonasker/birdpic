@@ -7,12 +7,28 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
 
-from skimage import io, segmentation, color
+from skimage import io
+# from skimage import segmentation
+# from skimage import color
 import skimage.draw
 
 COMPACTNESS = 35
 N_SEGMENTS = 200
 THRESHOLD = 30
+
+
+class Cursor(object):
+    def __init__(self, ax):
+        self.ax = ax
+        self.lx = ax.axhline(color='k')
+        self.ly = ax.axvline(color='k')
+
+    def mouse_move(self, event):
+        if not event.inaxes:
+            return
+        x, y = event.xdata, event.ydata
+        self.lx.set_ydata(y)
+        self.ly.set_xdata(x)
 
 
 class Example(QtGui.QMainWindow):
@@ -24,13 +40,8 @@ class Example(QtGui.QMainWindow):
         self.main = QtGui.QWidget()
         self.setCentralWidget(self.main)
 
-        self.figure = plt.figure()
+        self.figure, ax = plt.subplots()
         self.img = io.imread('nelicourvi.jpg')
-        # labels1 = segmentation.slic(
-        #     self.img, compactness=COMPACTNESS, n_segments=N_SEGMENTS)
-        # out1 = color.label2rgb(labels1, self.img, kind='overlay')
-        # rr, cc = skimage.draw.circle(100, 100, 50)
-        # out1[rr, cc] = [0, 0, 0]
         plt.imshow(self.img)
 
         self.rgb = [255, 255, 255]
@@ -39,8 +50,10 @@ class Example(QtGui.QMainWindow):
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.render_area = RenderArea(self)
 
+        self.cursor = Cursor(ax)
+
         self.figure.canvas.mpl_connect('button_press_event', self.on_click)
-        self.figure.canvas.mpl_connect('motion_notify_event', self.on_move)
+        self.figure.canvas.mpl_connect('motion_notify_event', self.cursor.mouse_move)
 
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -68,10 +81,12 @@ class Example(QtGui.QMainWindow):
     def on_click(self, event):
         self.rgb = list(self.img[int(event.ydata), int(event.xdata)])
         rr, cc = skimage.draw.circle(event.xdata, event.ydata, 3)
-        print(self.img[cc, rr])
+        print(self.img[rr, cc])
+        self.canvas.draw()
+        self.repaint()
 
-    def on_move(self, event):
-        pass
+    def paintEvent(self, event):
+        self.canvas.draw()
 
 
 class RenderArea(QtGui.QWidget):
