@@ -20,6 +20,10 @@ class Cursor(object):
         self.ax = ax
 
         color = 'black'
+        self.size = 40
+
+        self.x, self.y = 0, 0
+
         self.lx1 = ax.axhline(color=color)
         self.lx2 = ax.axhline(color=color)
 
@@ -29,14 +33,25 @@ class Cursor(object):
     def mouse_move(self, event):
         if not event.inaxes:
             return
-        size = 40
-        x, y = event.xdata, event.ydata
+        self.x, self.y = event.xdata, event.ydata
 
-        self.lx1.set_ydata(y - size / 2.0)
-        self.lx2.set_ydata(y + size / 2.0)
+        self.update()
 
-        self.ly1.set_xdata(x - size / 2.0)
-        self.ly2.set_xdata(x + size / 2.0)
+    def scroll(self, event):
+        # TODO Add a min and a max size
+        delta = 5
+        if event.button == 'up':
+            self.size += delta
+        if event.button == 'down':
+            self.size -= delta
+        self.update()
+
+    def update(self):
+        self.lx1.set_ydata(self.y - self.size / 2.0)
+        self.lx2.set_ydata(self.y + self.size / 2.0)
+
+        self.ly1.set_xdata(self.x - self.size / 2.0)
+        self.ly2.set_xdata(self.x + self.size / 2.0)
 
 
 class Example(QtGui.QMainWindow):
@@ -63,6 +78,8 @@ class Example(QtGui.QMainWindow):
         self.figure.canvas.mpl_connect('button_press_event', self.on_click)
         self.figure.canvas.mpl_connect(
             'motion_notify_event', self.cursor.mouse_move)
+        self.figure.canvas.mpl_connect(
+            'scroll_event', self.cursor.scroll)
 
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
