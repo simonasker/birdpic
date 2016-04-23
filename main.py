@@ -6,10 +6,8 @@ from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
-from skimage import io
-# from skimage import segmentation
-# from skimage import color
 import skimage.draw
 
 COMPACTNESS = 35
@@ -40,8 +38,8 @@ class Example(QtGui.QMainWindow):
         self.main = QtGui.QWidget()
         self.setCentralWidget(self.main)
 
-        self.figure, ax = plt.subplots()
-        self.img = io.imread('nelicourvi.jpg')
+        self.figure, self.ax = plt.subplots()
+        self.img = mpimg.imread('nelicourvi.jpg')
         plt.imshow(self.img)
 
         self.rgb = [255, 255, 255]
@@ -50,10 +48,11 @@ class Example(QtGui.QMainWindow):
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.render_area = RenderArea(self)
 
-        self.cursor = Cursor(ax)
+        self.cursor = Cursor(self.ax)
 
         self.figure.canvas.mpl_connect('button_press_event', self.on_click)
-        self.figure.canvas.mpl_connect('motion_notify_event', self.cursor.mouse_move)
+        self.figure.canvas.mpl_connect(
+            'motion_notify_event', self.cursor.mouse_move)
 
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
