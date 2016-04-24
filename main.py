@@ -171,12 +171,7 @@ class RenderArea(QtGui.QWidget):
         qp = QtGui.QPainter()
         qp.begin(self)
         col = QtGui.QColor(*self.parent.rgb)
-        qp.fillRect(0, 0, 200, 50, col)
-
-        # qp.setPen(QtGui.QColor(168, 34, 3))
-        # qp.setFont(QtGui.QFont('Monospace', 10))
-        # # qp.drawText(event.rect(), QtCore.Qt.AlignLeft, 'Hello')
-        # qp.drawText(0, 120, self.parent.display_text)
+        qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
 
 
