@@ -7,7 +7,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-# import numpy as np
+import numpy as np
 
 # import skimage.draw
 
@@ -109,12 +109,14 @@ class Example(QtGui.QMainWindow):
         radius = self.cursor.radius
         if radius <= 0:
             selected = self.img[y:y+1, x:x+1]
-            self.rgb = selected
         else:
             x1, x2 = x - radius + 2, x + radius + 2
             y1, y2 = y - radius + 2, y + radius + 2
             selected = self.img[y1:y2, x1:x2]
-        print(selected.shape)
+        a, b, _ = selected.shape
+        rgbs = selected.reshape((a * b, 3))
+        average = np.average(rgbs, axis=0)
+        self.rgb = list(map(int, average))
         self.repaint()
 
     def on_scroll(self, event):
