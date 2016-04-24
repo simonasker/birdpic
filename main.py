@@ -79,6 +79,9 @@ class Example(QtGui.QMainWindow):
         self.display_area.setFixedWidth(200)
         self.display_area.setFontFamily('monospace')
 
+        self.save_button = QtGui.QPushButton('Save', self)
+        self.save_button.clicked.connect(self.save)
+
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.render_area = RenderArea(self)
@@ -114,12 +117,16 @@ class Example(QtGui.QMainWindow):
         side_panel_vbox.addWidget(self.species_edit)
         side_panel_vbox.addWidget(self.field_edit)
         side_panel_vbox.addWidget(self.display_area)
+        side_panel_vbox.addWidget(self.save_button)
 
         main_hbox = QtGui.QHBoxLayout()
         main_hbox.addLayout(plt_vbox)
         main_hbox.addLayout(side_panel_vbox)
 
         self.main.setLayout(main_hbox)
+
+    def save(self):
+        print('Saving...')
 
     def on_click(self, event):
         x, y = int(event.xdata), int(event.ydata)
