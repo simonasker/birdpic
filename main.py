@@ -26,6 +26,9 @@ RADIUS_SCROLL_DELTA = 5
 
 class Cursor(object):
     def __init__(self, ax):
+        self.reset(ax)
+
+    def reset(self, ax):
         self.ax = ax
         self.x, self.y = 0, 0
         self.radius = START_RADIUS
@@ -64,10 +67,17 @@ class Example(QtGui.QMainWindow):
         self.setCentralWidget(self.main)
 
         self.figure, self.ax = plt.subplots()
+        self.cursor = Cursor(self.figure.axes[0])
         self.file_index = 0
         self.file_names = ['/home/simon/git/birdpic/nelicourvi.jpg']
-        self.img = mpimg.imread(self.file_names[self.file_index])
-        plt.imshow(self.img)
+        # self.img = mpimg.imread(self.file_names[self.file_index])
+        # plt.imshow(self.img)
+        self.reset_figure()
+
+        self.mean = [0, 0, 0]
+        self.median = [0, 0, 0]
+        self.var = [0, 0, 0]
+        self.std = [0, 0, 0]
 
         self.rgb = START_COLOR
 
@@ -93,7 +103,6 @@ class Example(QtGui.QMainWindow):
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.render_area = RenderArea(self)
 
-        self.cursor = Cursor(self.ax)
 
         self.figure.canvas.mpl_connect('button_press_event', self.on_click)
         self.figure.canvas.mpl_connect(
@@ -140,31 +149,29 @@ class Example(QtGui.QMainWindow):
 
         self.main.setLayout(main_hbox)
 
+    def reset_figure(self):
+        self.figure.clear()
+        self.img = mpimg.imread(self.file_names[self.file_index])
+        plt.imshow(self.img)
+        self.cursor.reset(self.figure.axes[0])
+        self.repaint()
+
     def showDialog(self):
         self.file_names = QtGui.QFileDialog.getOpenFileNames(
             self, 'Open file', '/home/simon/git/birdpic', '*.jpg *.png')
         # TODO Do some error checking here
         self.file_index = 0
-        self.img = mpimg.imread(self.file_names[self.file_index])
-        plt.imshow(self.img)
-        self.update_text()
-        self.repaint()
+        self.reset_figure()
 
     def next_file(self):
         if self.file_index < len(self.file_names) - 1:
             self.file_index += 1
-        self.img = mpimg.imread(self.file_names[self.file_index])
-        plt.imshow(self.img)
-        self.update_text()
-        self.repaint()
+        self.reset_figure()
 
     def prev_file(self):
         if self.file_index > 0:
             self.file_index -= 1
-        self.img = mpimg.imread(self.file_names[self.file_index])
-        plt.imshow(self.img)
-        self.update_text()
-        self.repaint()
+        self.reset_figure()
 
     def save(self):
         print('Saving...')
@@ -213,6 +220,7 @@ class Example(QtGui.QMainWindow):
 
     def paintEvent(self, event):
         self.canvas.draw()
+        self.update_text()
 
 
 class RenderArea(QtGui.QWidget):
