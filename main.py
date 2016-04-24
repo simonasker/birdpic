@@ -75,10 +75,9 @@ class Example(QtGui.QMainWindow):
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
-        self.display_area.setTextBackgroundColor(QtGui.QColor(200, 200, 200))
 
-        self.display_area.setText('hello')
         self.display_area.setFixedWidth(200)
+        self.display_area.setFontFamily('monospace')
 
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
@@ -143,15 +142,19 @@ class Example(QtGui.QMainWindow):
 
     def update_text(self):
         self.display_area.setText((
-            'mean: {}\n'
-            'median: {}\n'
-            'var: {}\n'
-            'std: {}\n'
+            'species: {:>15}\n'
+            'field: {:>15}\n'
+            'mean: {:>20}\n'
+            'median: {:>18}\n'
+            'var: {:>20}\n'
+            'std: {:>20}\n'
         ).format(
-            list(map(int, self.mean)),
-            list(map(int, self.median)),
-            list(map(int, self.var)),
-            list(map(int, self.std)),
+            self.species_edit.text(),
+            self.field_edit.text(),
+            str(list(map(int, self.mean))),
+            str(list(map(int, self.median))),
+            str(list(map(int, self.var))),
+            str(list(map(int, self.std))),
         ))
 
     def on_scroll(self, event):
