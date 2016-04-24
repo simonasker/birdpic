@@ -14,44 +14,41 @@ COMPACTNESS = 35
 N_SEGMENTS = 200
 THRESHOLD = 30
 
+CURSOR_COLOR = 'black'
+START_COLOR = [255, 255, 255]
+START_RADIUS = 5
+
 
 class Cursor(object):
     def __init__(self, ax):
         self.ax = ax
-
-        color = 'black'
-        self.size = 40
-
         self.x, self.y = 0, 0
+        self.radius = START_RADIUS
 
-        self.lx1 = ax.axhline(color=color)
-        self.lx2 = ax.axhline(color=color)
-
-        self.ly1 = ax.axvline(color=color)
-        self.ly2 = ax.axvline(color=color)
+        self.lx1 = ax.axhline(color=CURSOR_COLOR)
+        self.lx2 = ax.axhline(color=CURSOR_COLOR)
+        self.ly1 = ax.axvline(color=CURSOR_COLOR)
+        self.ly2 = ax.axvline(color=CURSOR_COLOR)
 
     def mouse_move(self, event):
-        if not event.inaxes:
-            return
-        self.x, self.y = event.xdata, event.ydata
+        if event.inaxes:
+            self.x, self.y = event.xdata, event.ydata
+            self.update()
 
-        self.update()
-
-    def scroll(self, event):
+    def mouse_scroll(self, event):
         # TODO Add a min and a max size
         delta = 5
         if event.button == 'up':
-            self.size += delta
+            self.radius += delta
         if event.button == 'down':
-            self.size -= delta
+            self.radius -= delta
         self.update()
 
     def update(self):
-        self.lx1.set_ydata(self.y - self.size / 2.0)
-        self.lx2.set_ydata(self.y + self.size / 2.0)
-
-        self.ly1.set_xdata(self.x - self.size / 2.0)
-        self.ly2.set_xdata(self.x + self.size / 2.0)
+        self.lx1.set_ydata(self.y - self.radius)
+        self.lx2.set_ydata(self.y + self.radius)
+        self.ly1.set_xdata(self.x - self.radius)
+        self.ly2.set_xdata(self.x + self.radius)
 
 
 class Example(QtGui.QMainWindow):
@@ -67,7 +64,7 @@ class Example(QtGui.QMainWindow):
         self.img = mpimg.imread('nelicourvi.jpg')
         plt.imshow(self.img)
 
-        self.rgb = [255, 255, 255]
+        self.rgb = START_COLOR
 
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
@@ -79,7 +76,8 @@ class Example(QtGui.QMainWindow):
         self.figure.canvas.mpl_connect(
             'motion_notify_event', self.cursor.mouse_move)
         self.figure.canvas.mpl_connect(
-            'scroll_event', self.cursor.scroll)
+            'scroll_event', self.cursor.mouse_scroll)
+        self.figure.canvas.mpl_connect('scroll_event', self.on_scroll)
 
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -108,7 +106,9 @@ class Example(QtGui.QMainWindow):
         self.rgb = list(self.img[int(event.ydata), int(event.xdata)])
         rr, cc = skimage.draw.circle(event.xdata, event.ydata, 3)
         print(self.img[rr, cc])
-        self.canvas.draw()
+        self.repaint()
+
+    def on_scroll(self, event):
         self.repaint()
 
     def paintEvent(self, event):
