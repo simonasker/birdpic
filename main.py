@@ -7,8 +7,9 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+# import numpy as np
 
-import skimage.draw
+# import skimage.draw
 
 COMPACTNESS = 35
 N_SEGMENTS = 200
@@ -16,7 +17,10 @@ THRESHOLD = 30
 
 CURSOR_COLOR = 'black'
 START_COLOR = [255, 255, 255]
-START_RADIUS = 5
+START_RADIUS = 10
+MIN_RADIUS = 0
+MAX_RADIUS = 50
+RADIUS_SCROLL_DELTA = 5
 
 
 class Cursor(object):
@@ -36,12 +40,10 @@ class Cursor(object):
             self.update()
 
     def mouse_scroll(self, event):
-        # TODO Add a min and a max size
-        delta = 5
-        if event.button == 'up':
-            self.radius += delta
-        if event.button == 'down':
-            self.radius -= delta
+        if event.button == 'up' and self.radius < MAX_RADIUS:
+            self.radius += RADIUS_SCROLL_DELTA
+        if event.button == 'down' and self.radius > MIN_RADIUS:
+            self.radius -= RADIUS_SCROLL_DELTA
         self.update()
 
     def update(self):
@@ -103,9 +105,16 @@ class Example(QtGui.QMainWindow):
         self.main.setLayout(hbox)
 
     def on_click(self, event):
-        self.rgb = list(self.img[int(event.ydata), int(event.xdata)])
-        rr, cc = skimage.draw.circle(event.xdata, event.ydata, 3)
-        print(self.img[rr, cc])
+        x, y = int(event.xdata), int(event.ydata)
+        radius = self.cursor.radius
+        if radius <= 0:
+            selected = self.img[y:y+1, x:x+1]
+            self.rgb = selected
+        else:
+            x1, x2 = x - radius + 2, x + radius + 2
+            y1, y2 = y - radius + 2, y + radius + 2
+            selected = self.img[y1:y2, x1:x2]
+        print(selected.shape)
         self.repaint()
 
     def on_scroll(self, event):
