@@ -64,7 +64,9 @@ class Example(QtGui.QMainWindow):
         self.setCentralWidget(self.main)
 
         self.figure, self.ax = plt.subplots()
-        self.img = mpimg.imread('nelicourvi.jpg')
+        self.file_index = 0
+        self.file_names = ['/home/simon/git/birdpic/nelicourvi.jpg']
+        self.img = mpimg.imread(self.file_names[self.file_index])
         plt.imshow(self.img)
 
         self.rgb = START_COLOR
@@ -82,6 +84,10 @@ class Example(QtGui.QMainWindow):
         self.save_button = QtGui.QPushButton('Save', self)
         self.save_button.clicked.connect(self.save)
 
+        self.next_button = QtGui.QPushButton('>', self)
+        self.next_button.clicked.connect(self.next_file)
+        self.prev_button = QtGui.QPushButton('<', self)
+        self.prev_button.clicked.connect(self.prev_file)
 
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
@@ -125,6 +131,8 @@ class Example(QtGui.QMainWindow):
         side_panel_vbox.addWidget(self.field_edit)
         side_panel_vbox.addWidget(self.display_area)
         side_panel_vbox.addWidget(self.save_button)
+        side_panel_vbox.addWidget(self.next_button)
+        side_panel_vbox.addWidget(self.prev_button)
 
         main_hbox = QtGui.QHBoxLayout()
         main_hbox.addLayout(plt_vbox)
@@ -133,10 +141,30 @@ class Example(QtGui.QMainWindow):
         self.main.setLayout(main_hbox)
 
     def showDialog(self):
-        file_names = QtGui.QFileDialog.getOpenFileNames(
+        self.file_names = QtGui.QFileDialog.getOpenFileNames(
             self, 'Open file', '/home/simon/git/birdpic', '*.jpg *.png')
-        self.img = mpimg.imread(file_names[0])
+        # TODO Do some error checking here
+        self.file_index = 0
+        self.img = mpimg.imread(self.file_names[self.file_index])
         plt.imshow(self.img)
+        self.update_text()
+        self.repaint()
+
+    def next_file(self):
+        if self.file_index < len(self.file_names) - 1:
+            self.file_index += 1
+        self.img = mpimg.imread(self.file_names[self.file_index])
+        plt.imshow(self.img)
+        self.update_text()
+        self.repaint()
+
+    def prev_file(self):
+        if self.file_index > 0:
+            self.file_index -= 1
+        self.img = mpimg.imread(self.file_names[self.file_index])
+        plt.imshow(self.img)
+        self.update_text()
+        self.repaint()
 
     def save(self):
         print('Saving...')
@@ -168,6 +196,7 @@ class Example(QtGui.QMainWindow):
             'median: {:>18}\n'
             'var: {:>20}\n'
             'std: {:>20}\n'
+            'file: {}/{}\n'
         ).format(
             self.species_edit.text(),
             self.field_edit.text(),
@@ -175,6 +204,8 @@ class Example(QtGui.QMainWindow):
             str(list(map(int, self.median))),
             str(list(map(int, self.var))),
             str(list(map(int, self.std))),
+            self.file_index + 1,
+            len(self.file_names),
         ))
 
     def on_scroll(self, event):
