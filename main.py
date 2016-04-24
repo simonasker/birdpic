@@ -3,7 +3,7 @@
 import sys
 
 from PyQt4 import QtGui
-from PyQt4 import QtCore
+# from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
@@ -70,7 +70,15 @@ class Example(QtGui.QMainWindow):
         self.rgb = START_COLOR
 
         self.display_text = 'This is shit\nHello'
-        self.display_label = QtGui.QLabel('Foooo', self)
+        self.species_edit = QtGui.QLineEdit(self)
+        self.field_edit = QtGui.QLineEdit(self)
+
+        self.display_area = QtGui.QTextEdit(self)
+        self.display_area.setReadOnly(True)
+        self.display_area.setTextBackgroundColor(QtGui.QColor(200, 200, 200))
+
+        self.display_area.setText('hello')
+        self.display_area.setFixedWidth(200)
 
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
@@ -104,7 +112,9 @@ class Example(QtGui.QMainWindow):
 
         side_panel_vbox = QtGui.QVBoxLayout()
         side_panel_vbox.addWidget(self.render_area)
-        side_panel_vbox.addWidget(self.display_label)
+        side_panel_vbox.addWidget(self.species_edit)
+        side_panel_vbox.addWidget(self.field_edit)
+        side_panel_vbox.addWidget(self.display_area)
 
         main_hbox = QtGui.QHBoxLayout()
         main_hbox.addLayout(plt_vbox)
@@ -132,7 +142,7 @@ class Example(QtGui.QMainWindow):
         self.repaint()
 
     def update_text(self):
-        self.display_label.setText((
+        self.display_area.setText((
             'mean: {}\n'
             'median: {}\n'
             'var: {}\n'
@@ -155,15 +165,13 @@ class RenderArea(QtGui.QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setMinimumWidth(200)
-        self.setMinimumHeight(100)
-        self.setMaximumHeight(100)
+        self.setFixedSize(200, 50)
 
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
         col = QtGui.QColor(*self.parent.rgb)
-        qp.fillRect(0, 0, 100, 100, col)
+        qp.fillRect(0, 0, 200, 50, col)
 
         # qp.setPen(QtGui.QColor(168, 34, 3))
         # qp.setFont(QtGui.QFont('Monospace', 10))
