@@ -3,6 +3,7 @@
 import sys
 
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
@@ -68,6 +69,9 @@ class Example(QtGui.QMainWindow):
 
         self.rgb = START_COLOR
 
+        self.display_text = 'This is shit\nHello'
+        self.display_label = QtGui.QLabel('Foooo', self)
+
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.render_area = RenderArea(self)
@@ -94,15 +98,19 @@ class Example(QtGui.QMainWindow):
 
         self.setWindowTitle('Untitled')
 
-        hbox = QtGui.QHBoxLayout()
-        vbox = QtGui.QVBoxLayout()
+        plt_vbox = QtGui.QVBoxLayout()
+        plt_vbox.addWidget(self.canvas)
+        plt_vbox.addWidget(self.toolbar)
 
-        vbox.addWidget(self.canvas)
-        vbox.addWidget(self.toolbar)
+        side_panel_vbox = QtGui.QVBoxLayout()
+        side_panel_vbox.addWidget(self.render_area)
+        side_panel_vbox.addWidget(self.display_label)
 
-        hbox.addLayout(vbox)
-        hbox.addWidget(self.render_area)
-        self.main.setLayout(hbox)
+        main_hbox = QtGui.QHBoxLayout()
+        main_hbox.addLayout(plt_vbox)
+        main_hbox.addLayout(side_panel_vbox)
+
+        self.main.setLayout(main_hbox)
 
     def on_click(self, event):
         x, y = int(event.xdata), int(event.ydata)
@@ -115,9 +123,26 @@ class Example(QtGui.QMainWindow):
             selected = self.img[y1:y2, x1:x2]
         a, b, _ = selected.shape
         rgbs = selected.reshape((a * b, 3))
-        average = np.average(rgbs, axis=0)
-        self.rgb = list(map(int, average))
+        self.mean = np.mean(rgbs, axis=0)
+        self.median = np.median(rgbs, axis=0)
+        self.var = np.var(rgbs, axis=0)
+        self.std = np.std(rgbs, axis=0)
+        self.rgb = list(map(int, self.mean))
+        self.update_text()
         self.repaint()
+
+    def update_text(self):
+        self.display_label.setText((
+            'mean: {}\n'
+            'median: {}\n'
+            'var: {}\n'
+            'std: {}\n'
+        ).format(
+            list(map(int, self.mean)),
+            list(map(int, self.median)),
+            list(map(int, self.var)),
+            list(map(int, self.std)),
+        ))
 
     def on_scroll(self, event):
         self.repaint()
@@ -130,13 +155,20 @@ class RenderArea(QtGui.QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setMinimumWidth(100)
+        self.setMinimumWidth(200)
+        self.setMinimumHeight(100)
+        self.setMaximumHeight(100)
 
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
         col = QtGui.QColor(*self.parent.rgb)
         qp.fillRect(0, 0, 100, 100, col)
+
+        # qp.setPen(QtGui.QColor(168, 34, 3))
+        # qp.setFont(QtGui.QFont('Monospace', 10))
+        # # qp.drawText(event.rect(), QtCore.Qt.AlignLeft, 'Hello')
+        # qp.drawText(0, 120, self.parent.display_text)
         qp.end()
 
 
