@@ -82,6 +82,7 @@ class Example(QtGui.QMainWindow):
         self.save_button = QtGui.QPushButton('Save', self)
         self.save_button.clicked.connect(self.save)
 
+
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.render_area = RenderArea(self)
@@ -95,6 +96,11 @@ class Example(QtGui.QMainWindow):
             'scroll_event', self.cursor.mouse_scroll)
         self.figure.canvas.mpl_connect('scroll_event', self.on_scroll)
 
+        openFile = QtGui.QAction(QtGui.QIcon('open.png'), 'Open', self)
+        openFile.setShortcut('Ctrl+O')
+        openFile.setStatusTip('Open new file')
+        openFile.triggered.connect(self.showDialog)
+
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
@@ -104,6 +110,7 @@ class Example(QtGui.QMainWindow):
 
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(openFile)
         fileMenu.addAction(exitAction)
 
         self.setWindowTitle('Untitled')
@@ -124,6 +131,12 @@ class Example(QtGui.QMainWindow):
         main_hbox.addLayout(side_panel_vbox)
 
         self.main.setLayout(main_hbox)
+
+    def showDialog(self):
+        file_names = QtGui.QFileDialog.getOpenFileNames(
+            self, 'Open file', '/home/simon/git/birdpic', '*.jpg *.png')
+        self.img = mpimg.imread(file_names[0])
+        plt.imshow(self.img)
 
     def save(self):
         print('Saving...')
