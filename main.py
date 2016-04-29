@@ -66,6 +66,8 @@ class Example(QtGui.QMainWindow):
     def init_ui(self):
         self.main = QtGui.QWidget()
         self.setCentralWidget(self.main)
+        self.setWindowTitle('Untitled')
+        self.statusBar()
 
         self.figure, self.ax = plt.subplots()
         self.cursor = Cursor(self.figure.axes[0])
@@ -82,13 +84,54 @@ class Example(QtGui.QMainWindow):
 
         self.rgb = START_COLOR
 
-        self.display_text = 'This is shit\nHello'
+        self.canvas = FigureCanvasQTAgg(self.figure)
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+
+        self.figure.canvas.mpl_connect('button_press_event', self.on_click)
+        self.figure.canvas.mpl_connect(
+            'motion_notify_event', self.cursor.mouse_move)
+        self.figure.canvas.mpl_connect(
+            'scroll_event', self.cursor.mouse_scroll)
+        self.figure.canvas.mpl_connect('scroll_event', self.on_scroll)
+
+        plt_vbox = QtGui.QVBoxLayout()
+
+        plt_vbox.addWidget(self.canvas)
+        plt_vbox.addWidget(self.toolbar)
+
+        side_panel_vbox = self.create_side_panel()
+
+        main_hbox = QtGui.QHBoxLayout()
+        main_hbox.addLayout(plt_vbox)
+        main_hbox.addLayout(side_panel_vbox)
+
+        self.main.setLayout(main_hbox)
+
+    def create_menubar(self):
+        openFile = QtGui.QAction(QtGui.QIcon('open.png'), 'Open', self)
+        openFile.setShortcut('Ctrl+O')
+        openFile.setStatusTip('Open new file')
+        openFile.triggered.connect(self.showDialog)
+
+        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(self.close)
+
+        menubar = self.menuBar()
+
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(openFile)
+        fileMenu.addAction(exitAction)
+
+    def create_side_panel(self):
+        self.render_area = RenderArea(self)
+
         self.species_edit = QtGui.QLineEdit(self)
         self.field_edit = QtGui.QLineEdit(self)
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
-
         self.display_area.setFixedWidth(200)
         self.display_area.setFontFamily('monospace')
 
@@ -100,40 +143,6 @@ class Example(QtGui.QMainWindow):
         self.prev_button = QtGui.QPushButton('<', self)
         self.prev_button.clicked.connect(self.prev_file)
 
-        self.canvas = FigureCanvasQTAgg(self.figure)
-        self.toolbar = NavigationToolbar2QT(self.canvas, self)
-        self.render_area = RenderArea(self)
-
-        self.figure.canvas.mpl_connect('button_press_event', self.on_click)
-        self.figure.canvas.mpl_connect(
-            'motion_notify_event', self.cursor.mouse_move)
-        self.figure.canvas.mpl_connect(
-            'scroll_event', self.cursor.mouse_scroll)
-        self.figure.canvas.mpl_connect('scroll_event', self.on_scroll)
-
-        openFile = QtGui.QAction(QtGui.QIcon('open.png'), 'Open', self)
-        openFile.setShortcut('Ctrl+O')
-        openFile.setStatusTip('Open new file')
-        openFile.triggered.connect(self.showDialog)
-
-        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(self.close)
-
-        self.statusBar()
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(openFile)
-        fileMenu.addAction(exitAction)
-
-        self.setWindowTitle('Untitled')
-
-        plt_vbox = QtGui.QVBoxLayout()
-        plt_vbox.addWidget(self.canvas)
-        plt_vbox.addWidget(self.toolbar)
-
         side_panel_vbox = QtGui.QVBoxLayout()
         side_panel_vbox.addWidget(self.render_area)
         side_panel_vbox.addWidget(self.species_edit)
@@ -142,12 +151,7 @@ class Example(QtGui.QMainWindow):
         side_panel_vbox.addWidget(self.save_button)
         side_panel_vbox.addWidget(self.next_button)
         side_panel_vbox.addWidget(self.prev_button)
-
-        main_hbox = QtGui.QHBoxLayout()
-        main_hbox.addLayout(plt_vbox)
-        main_hbox.addLayout(side_panel_vbox)
-
-        self.main.setLayout(main_hbox)
+        return side_panel_vbox
 
     def reset_figure(self):
         self.figure.clear()
