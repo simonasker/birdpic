@@ -77,6 +77,15 @@ class Example(QtGui.QMainWindow):
         # plt.imshow(self.img)
         self.reset_figure()
 
+        self.genus_items = [
+            'foo',
+            'bar',
+            'baz',
+        ]
+        self.species_items = self.genus_items
+        self.ssp_items = self.genus_items
+        self.field_items = self.genus_items
+
         self.mean = [0, 0, 0]
         self.median = [0, 0, 0]
         self.var = [0, 0, 0]
@@ -132,25 +141,29 @@ class Example(QtGui.QMainWindow):
 
         self.genus_hbox = QtGui.QHBoxLayout()
         self.genus_label = QtGui.QLabel('Genus:')
-        self.genus_edit = QtGui.QLineEdit(self)
+        self.genus_edit = QtGui.QComboBox(self)
+        self.genus_edit.addItems(self.genus_items)
         self.genus_hbox.addWidget(self.genus_label)
         self.genus_hbox.addWidget(self.genus_edit)
         layout.addLayout(self.genus_hbox)
         self.species_hbox = QtGui.QHBoxLayout()
         self.species_label = QtGui.QLabel('Species:')
-        self.species_edit = QtGui.QLineEdit(self)
+        self.species_edit = QtGui.QComboBox(self)
+        self.species_edit.addItems(self.species_items)
         self.species_hbox.addWidget(self.species_label)
         self.species_hbox.addWidget(self.species_edit)
         layout.addLayout(self.species_hbox)
         self.ssp_hbox = QtGui.QHBoxLayout()
         self.ssp_label = QtGui.QLabel('SSP:')
-        self.ssp_edit = QtGui.QLineEdit(self)
+        self.ssp_edit = QtGui.QComboBox(self)
+        self.ssp_edit.addItems(self.ssp_items)
         self.ssp_hbox.addWidget(self.ssp_label)
         self.ssp_hbox.addWidget(self.ssp_edit)
         layout.addLayout(self.ssp_hbox)
         self.field_hbox = QtGui.QHBoxLayout()
         self.field_label = QtGui.QLabel('Field:')
-        self.field_edit = QtGui.QLineEdit(self)
+        self.field_edit = QtGui.QComboBox(self)
+        self.field_edit.addItems(self.field_items)
         self.field_hbox.addWidget(self.field_label)
         self.field_hbox.addWidget(self.field_edit)
         layout.addLayout(self.field_hbox)
@@ -224,7 +237,9 @@ class Example(QtGui.QMainWindow):
 
     def update_text(self):
         self.display_area.setText((
+            'genus: {:>15}\n'
             'species: {:>15}\n'
+            'ssp: {:>15}\n'
             'field: {:>15}\n'
             'mean: {:>20}\n'
             'median: {:>18}\n'
@@ -236,8 +251,10 @@ class Example(QtGui.QMainWindow):
             'sample size: {}\n'
 
         ).format(
-            self.species_edit.text(),
-            self.field_edit.text(),
+            self.genus_edit.currentText(),
+            self.species_edit.currentText(),
+            self.ssp_edit.currentText(),
+            self.field_edit.currentText(),
             str(list(map(int, self.mean))),
             str(list(map(int, self.median))),
             str(list(map(int, self.var))),
