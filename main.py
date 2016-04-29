@@ -125,33 +125,56 @@ class Example(QtGui.QMainWindow):
         fileMenu.addAction(exitAction)
 
     def create_side_panel(self):
-        self.render_area = RenderArea(self)
+        layout = QtGui.QVBoxLayout()
 
+        self.render_area = RenderArea(self)
+        layout.addWidget(self.render_area)
+
+        self.genus_hbox = QtGui.QHBoxLayout()
+        self.genus_label = QtGui.QLabel('Genus:')
+        self.genus_edit = QtGui.QLineEdit(self)
+        self.genus_hbox.addWidget(self.genus_label)
+        self.genus_hbox.addWidget(self.genus_edit)
+        layout.addLayout(self.genus_hbox)
+        self.species_hbox = QtGui.QHBoxLayout()
+        self.species_label = QtGui.QLabel('Species:')
         self.species_edit = QtGui.QLineEdit(self)
+        self.species_hbox.addWidget(self.species_label)
+        self.species_hbox.addWidget(self.species_edit)
+        layout.addLayout(self.species_hbox)
+        self.ssp_hbox = QtGui.QHBoxLayout()
+        self.ssp_label = QtGui.QLabel('SSP:')
+        self.ssp_edit = QtGui.QLineEdit(self)
+        self.ssp_hbox.addWidget(self.ssp_label)
+        self.ssp_hbox.addWidget(self.ssp_edit)
+        layout.addLayout(self.ssp_hbox)
+        self.field_hbox = QtGui.QHBoxLayout()
+        self.field_label = QtGui.QLabel('Field:')
         self.field_edit = QtGui.QLineEdit(self)
+        self.field_hbox.addWidget(self.field_label)
+        self.field_hbox.addWidget(self.field_edit)
+        layout.addLayout(self.field_hbox)
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
         self.display_area.setFixedWidth(200)
         self.display_area.setFontFamily('monospace')
+        layout.addWidget(self.display_area)
 
         self.save_button = QtGui.QPushButton('Save', self)
         self.save_button.clicked.connect(self.save)
+        layout.addWidget(self.save_button)
 
-        self.next_button = QtGui.QPushButton('>', self)
-        self.next_button.clicked.connect(self.next_file)
+        self.prev_next_hbox = QtGui.QHBoxLayout()
         self.prev_button = QtGui.QPushButton('<', self)
         self.prev_button.clicked.connect(self.prev_file)
+        self.prev_next_hbox.addWidget(self.prev_button)
+        self.next_button = QtGui.QPushButton('>', self)
+        self.next_button.clicked.connect(self.next_file)
+        self.prev_next_hbox.addWidget(self.next_button)
+        layout.addLayout(self.prev_next_hbox)
 
-        side_panel_vbox = QtGui.QVBoxLayout()
-        side_panel_vbox.addWidget(self.render_area)
-        side_panel_vbox.addWidget(self.species_edit)
-        side_panel_vbox.addWidget(self.field_edit)
-        side_panel_vbox.addWidget(self.display_area)
-        side_panel_vbox.addWidget(self.save_button)
-        side_panel_vbox.addWidget(self.next_button)
-        side_panel_vbox.addWidget(self.prev_button)
-        return side_panel_vbox
+        return layout
 
     def reset_figure(self):
         self.figure.clear()
