@@ -72,7 +72,7 @@ class Example(QtGui.QMainWindow):
         self.figure, self.ax = plt.subplots()
         self.cursor = Cursor(self.figure.axes[0])
         self.file_index = 0
-        self.file_names = ['/home/simon/git/birdpic/nelicourvi.jpg']
+        self.file_names = ['nelicourvi.jpg']
         # self.img = mpimg.imread(self.file_names[self.file_index])
         # plt.imshow(self.img)
         self.reset_figure()
