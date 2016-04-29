@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 
 from PyQt4 import QtGui
 # from PyQt4 import QtCore
@@ -103,7 +104,6 @@ class Example(QtGui.QMainWindow):
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.render_area = RenderArea(self)
 
-
         self.figure.canvas.mpl_connect('button_press_event', self.on_click)
         self.figure.canvas.mpl_connect(
             'motion_notify_event', self.cursor.mouse_move)
@@ -204,6 +204,7 @@ class Example(QtGui.QMainWindow):
             'var: {:>20}\n'
             'std: {:>20}\n'
             'file: {}/{}\n'
+            'filename: {}\n'
         ).format(
             self.species_edit.text(),
             self.field_edit.text(),
@@ -213,6 +214,7 @@ class Example(QtGui.QMainWindow):
             str(list(map(int, self.std))),
             self.file_index + 1,
             len(self.file_names),
+            os.path.basename(self.file_names[self.file_index]),
         ))
 
     def on_scroll(self, event):
