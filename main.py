@@ -41,7 +41,7 @@ class Cursor(object):
 
     def mouse_move(self, event):
         if event.inaxes:
-            self.x, self.y = event.xdata, event.ydata
+            self.x, self.y = int(event.xdata), int(event.ydata)
             self.update()
 
     def mouse_scroll(self, event):
@@ -205,6 +205,9 @@ class Example(QtGui.QMainWindow):
             'std: {:>20}\n'
             'file: {}/{}\n'
             'filename: {}\n'
+            'cursor: ({}, {})\n'
+            'sample size: {}\n'
+
         ).format(
             self.species_edit.text(),
             self.field_edit.text(),
@@ -215,6 +218,9 @@ class Example(QtGui.QMainWindow):
             self.file_index + 1,
             len(self.file_names),
             os.path.basename(self.file_names[self.file_index]),
+            self.cursor.x,
+            self.cursor.y,
+            (self.cursor.radius * 2) ** 2,
         ))
 
     def on_scroll(self, event):
