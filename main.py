@@ -24,6 +24,8 @@ MIN_RADIUS = 0
 MAX_RADIUS = 50
 RADIUS_SCROLL_DELTA = 5
 
+DISPLAY_PYPLOT_TOOLBAR = False
+
 
 class Cursor(object):
     def __init__(self, ax):
@@ -92,20 +94,12 @@ class Example(QtGui.QMainWindow):
 
         self.rgb = START_COLOR
 
-        self.canvas = FigureCanvasQTAgg(self.figure)
-        self.toolbar = NavigationToolbar2QT(self.canvas, self)
-
-        self.figure.canvas.mpl_connect('button_press_event', self.on_click)
-        self.figure.canvas.mpl_connect(
-            'motion_notify_event', self.cursor.mouse_move)
-        self.figure.canvas.mpl_connect(
-            'scroll_event', self.cursor.mouse_scroll)
-        self.figure.canvas.mpl_connect('scroll_event', self.on_scroll)
-
         plt_vbox = QtGui.QVBoxLayout()
-
+        self.canvas = FigureCanvasQTAgg(self.figure)
         plt_vbox.addWidget(self.canvas)
-        plt_vbox.addWidget(self.toolbar)
+        if DISPLAY_PYPLOT_TOOLBAR:
+            self.toolbar = NavigationToolbar2QT(self.canvas, self)
+            plt_vbox.addWidget(self.toolbar)
 
         side_panel_vbox = self.create_side_panel()
 
@@ -116,6 +110,20 @@ class Example(QtGui.QMainWindow):
         main_hbox.addLayout(side_panel_vbox)
 
         self.main.setLayout(main_hbox)
+        self.connect_mouse_events()
+
+    def connect_mouse_events(self):
+        self.figure.canvas.mpl_connect(
+            'motion_notify_event', self.cursor.mouse_move)
+        self.figure.canvas.mpl_connect(
+            'scroll_event', self.cursor.mouse_scroll)
+
+        self.figure.canvas.mpl_connect(
+            'button_press_event', self.on_click)
+        self.figure.canvas.mpl_connect(
+            'scroll_event', self.on_scroll)
+        self.figure.canvas.mpl_connect(
+            'motion_notify_event', self.on_move)
 
     def create_menubar(self):
         openFile = QtGui.QAction(QtGui.QIcon('open.png'), 'Open', self)
@@ -232,6 +240,9 @@ class Example(QtGui.QMainWindow):
     def save(self):
         print('Saving...')
 
+    def on_move(self, event):
+        self.repaint()
+
     def on_click(self, event):
         x, y = int(event.xdata), int(event.ydata)
         radius = self.cursor.radius
@@ -249,6 +260,9 @@ class Example(QtGui.QMainWindow):
         self.std = np.std(rgbs, axis=0)
         self.rgb = list(map(int, self.mean))
         self.update_text()
+        self.repaint()
+
+    def on_scroll(self, event):
         self.repaint()
 
     def update_text(self):
@@ -270,8 +284,6 @@ class Example(QtGui.QMainWindow):
             result += s
         self.display_area.setText(result)
 
-    def on_scroll(self, event):
-        self.repaint()
 
     def paintEvent(self, event):
         self.canvas.draw()
