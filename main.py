@@ -178,13 +178,16 @@ class Example(QtGui.QMainWindow):
         self.file_label = QtGui.QLabel('Filename')
         layout.addWidget(self.file_label)
 
+        self.species_group = QtGui.QGroupBox('Species')
+        self.species_group_vbox = QtGui.QVBoxLayout()
+
         self.genus_hbox = QtGui.QHBoxLayout()
         self.genus_label = QtGui.QLabel('Genus:')
         self.genus_edit = QtGui.QComboBox(self)
         self.genus_edit.activated[str].connect(self.select_genus)
         self.genus_hbox.addWidget(self.genus_label)
         self.genus_hbox.addWidget(self.genus_edit)
-        layout.addLayout(self.genus_hbox)
+        self.species_group_vbox.addLayout(self.genus_hbox)
 
         self.species_hbox = QtGui.QHBoxLayout()
         self.species_label = QtGui.QLabel('Species:')
@@ -192,14 +195,17 @@ class Example(QtGui.QMainWindow):
         self.species_edit.activated[str].connect(self.select_species)
         self.species_hbox.addWidget(self.species_label)
         self.species_hbox.addWidget(self.species_edit)
-        layout.addLayout(self.species_hbox)
+        self.species_group_vbox.addLayout(self.species_hbox)
 
         self.ssp_hbox = QtGui.QHBoxLayout()
         self.ssp_label = QtGui.QLabel('SSP:')
         self.ssp_edit = QtGui.QComboBox(self)
         self.ssp_hbox.addWidget(self.ssp_label)
         self.ssp_hbox.addWidget(self.ssp_edit)
-        layout.addLayout(self.ssp_hbox)
+        self.species_group_vbox.addLayout(self.ssp_hbox)
+
+        self.species_group.setLayout(self.species_group_vbox)
+        layout.addWidget(self.species_group)
 
         self.field_hbox = QtGui.QHBoxLayout()
         self.field_label = QtGui.QLabel('Field:')
