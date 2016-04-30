@@ -2,6 +2,7 @@
 
 import sys
 import os
+import collections
 
 from PyQt4 import QtGui
 # from PyQt4 import QtCore
@@ -238,36 +239,24 @@ class Example(QtGui.QMainWindow):
         self.repaint()
 
     def update_text(self):
-        self.display_area.setText((
-            'genus: {:>15}\n'
-            'species: {:>15}\n'
-            'ssp: {:>15}\n'
-            'field: {:>15}\n'
-            'mean: {:>20}\n'
-            'median: {:>18}\n'
-            'var: {:>20}\n'
-            'std: {:>20}\n'
-            'file: {}/{}\n'
-            'filename: {}\n'
-            'cursor: ({}, {})\n'
-            'sample size: {}\n'
-
-        ).format(
-            self.genus_edit.currentText(),
-            self.species_edit.currentText(),
-            self.ssp_edit.currentText(),
-            self.field_edit.currentText(),
-            str(list(map(int, self.mean))),
-            str(list(map(int, self.median))),
-            str(list(map(int, self.var))),
-            str(list(map(int, self.std))),
-            self.file_index + 1,
-            len(self.file_names),
-            os.path.basename(self.file_names[self.file_index]),
-            self.cursor.x,
-            self.cursor.y,
-            (self.cursor.radius * 2) ** 2,
-        ))
+        result = ""
+        display_items = [
+            ('filename', os.path.basename(self.file_names[self.file_index])),
+            ('genus', self.genus_edit.currentText()),
+            ('species', self.species_edit.currentText()),
+            ('ssp', self.ssp_edit.currentText()),
+            ('field', self.field_edit.currentText()),
+            ('mean', str(list(map(int, self.mean)))),
+            ('median', str(list(map(int, self.median)))),
+            ('std', str(list(map(int, self.std)))),
+            ('point', '({}, {})'.format(self.cursor.x, self.cursor.y)),
+            ('size', str((self.cursor.radius * 2) ** 2)),
+        ]
+        total_w = 25
+        for (k, v) in display_items:
+            s = '{}:{:>{}}\n'.format(str(k), str(v), total_w - len(str(k)))
+            result += s
+        self.display_area.setText(result)
 
     def on_scroll(self, event):
         self.repaint()
