@@ -2,7 +2,6 @@
 
 import sys
 import os
-import collections
 
 from PyQt4 import QtGui
 # from PyQt4 import QtCore
@@ -73,10 +72,7 @@ class Example(QtGui.QMainWindow):
         self.figure, self.ax = plt.subplots()
         self.cursor = Cursor(self.figure.axes[0])
         self.file_index = 0
-        self.file_names = ['nelicourvi.jpg']
-        # self.img = mpimg.imread(self.file_names[self.file_index])
-        # plt.imshow(self.img)
-        self.reset_figure()
+        self.files = []
 
         self.genus_items = [
             'foo',
@@ -142,6 +138,9 @@ class Example(QtGui.QMainWindow):
         self.render_area = RenderArea(self)
         layout.addWidget(self.render_area)
 
+        self.file_label = QtGui.QLabel('Filename')
+        layout.addWidget(self.file_label)
+
         self.genus_hbox = QtGui.QHBoxLayout()
         self.genus_label = QtGui.QLabel('Genus:')
         self.genus_edit = QtGui.QComboBox(self)
@@ -194,20 +193,20 @@ class Example(QtGui.QMainWindow):
 
     def reset_figure(self):
         self.figure.clear()
-        self.img = mpimg.imread(self.file_names[self.file_index])
+        self.img = mpimg.imread(self.files[self.file_index])
         plt.imshow(self.img)
         self.cursor.reset(self.figure.axes[0])
         self.repaint()
 
     def showDialog(self):
-        self.file_names = QtGui.QFileDialog.getOpenFileNames(
+        self.files = QtGui.QFileDialog.getOpenFileNames(
             self, 'Open file', '/home/simon/git/birdpic', '*.jpg *.png')
         # TODO Do some error checking here
         self.file_index = 0
         self.reset_figure()
 
     def next_file(self):
-        if self.file_index < len(self.file_names) - 1:
+        if self.file_index < len(self.files) - 1:
             self.file_index += 1
         self.reset_figure()
 
@@ -215,6 +214,12 @@ class Example(QtGui.QMainWindow):
         if self.file_index > 0:
             self.file_index -= 1
         self.reset_figure()
+
+    def get_file_name(self):
+        if len(self.files) == 0:
+            return 'No file open'
+        else:
+            return os.path.basename(self.files[self.file_index])
 
     def save(self):
         print('Saving...')
@@ -241,7 +246,6 @@ class Example(QtGui.QMainWindow):
     def update_text(self):
         result = ""
         display_items = [
-            ('filename', os.path.basename(self.file_names[self.file_index])),
             ('genus', self.genus_edit.currentText()),
             ('species', self.species_edit.currentText()),
             ('ssp', self.ssp_edit.currentText()),
@@ -264,6 +268,7 @@ class Example(QtGui.QMainWindow):
     def paintEvent(self, event):
         self.canvas.draw()
         self.update_text()
+        self.file_label.setText(self.get_file_name())
 
 
 class RenderArea(QtGui.QWidget):
