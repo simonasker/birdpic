@@ -14,9 +14,6 @@ setup(
                 'matplotlib.backends.backend_tkagg',
                 'tkinter.filedialog',
             ],
-            # 'excludes': ['tkinter'],
-            # 'bundle_files': 2,
         }
     },
-    # zipfile=None,
 )
