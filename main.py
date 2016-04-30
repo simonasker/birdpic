@@ -2,6 +2,7 @@
 
 import sys
 import os
+import json
 
 from PyQt4 import QtGui
 # from PyQt4 import QtCore
@@ -106,6 +107,8 @@ class Example(QtGui.QMainWindow):
 
         side_panel_vbox = self.create_side_panel()
 
+        self.load_species_data()
+
         self.create_menubar()
 
         main_hbox = QtGui.QHBoxLayout()
@@ -114,6 +117,13 @@ class Example(QtGui.QMainWindow):
 
         self.main.setLayout(main_hbox)
         self.connect_mouse_events()
+
+    def load_species_data(self):
+        with open('species.json') as f:
+            self.species_data = json.load(f)
+        genus = list(self.species_data.keys())
+        self.genus_edit.addItems(genus)
+        self.select_genus(genus[0])
 
     def connect_mouse_events(self):
         self.figure.canvas.mpl_connect(
@@ -145,6 +155,20 @@ class Example(QtGui.QMainWindow):
         fileMenu.addAction(openFile)
         fileMenu.addAction(exitAction)
 
+    def select_genus(self, event):
+        self.genus = event
+        self.species_edit.clear()
+        species = list(self.species_data[self.genus].keys())
+        self.species_edit.addItems(species)
+        self.select_species(species[0])
+
+    def select_species(self, event):
+        self.species = event
+        self.ssp_edit.clear()
+        subspecies = self.species_data[self.genus][self.species]
+        self.ssp_edit.addItems(subspecies)
+        self.ssp = subspecies[0]
+
     def create_side_panel(self):
         layout = QtGui.QVBoxLayout()
 
@@ -157,24 +181,26 @@ class Example(QtGui.QMainWindow):
         self.genus_hbox = QtGui.QHBoxLayout()
         self.genus_label = QtGui.QLabel('Genus:')
         self.genus_edit = QtGui.QComboBox(self)
-        self.genus_edit.addItems(self.genus_items)
+        self.genus_edit.activated[str].connect(self.select_genus)
         self.genus_hbox.addWidget(self.genus_label)
         self.genus_hbox.addWidget(self.genus_edit)
         layout.addLayout(self.genus_hbox)
+
         self.species_hbox = QtGui.QHBoxLayout()
         self.species_label = QtGui.QLabel('Species:')
         self.species_edit = QtGui.QComboBox(self)
-        self.species_edit.addItems(self.species_items)
+        self.species_edit.activated[str].connect(self.select_species)
         self.species_hbox.addWidget(self.species_label)
         self.species_hbox.addWidget(self.species_edit)
         layout.addLayout(self.species_hbox)
+
         self.ssp_hbox = QtGui.QHBoxLayout()
         self.ssp_label = QtGui.QLabel('SSP:')
         self.ssp_edit = QtGui.QComboBox(self)
-        self.ssp_edit.addItems(self.ssp_items)
         self.ssp_hbox.addWidget(self.ssp_label)
         self.ssp_hbox.addWidget(self.ssp_edit)
         layout.addLayout(self.ssp_hbox)
+
         self.field_hbox = QtGui.QHBoxLayout()
         self.field_label = QtGui.QLabel('Field:')
         self.field_edit = QtGui.QComboBox(self)
