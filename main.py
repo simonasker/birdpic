@@ -91,6 +91,9 @@ class Example(QtGui.QMainWindow):
         self.median = [0, 0, 0]
         self.var = [0, 0, 0]
         self.std = [0, 0, 0]
+        self.sample_size = 0
+        self.point_x = 0
+        self.point_y = 0
 
         self.rgb = START_COLOR
 
@@ -259,6 +262,9 @@ class Example(QtGui.QMainWindow):
         self.var = np.var(rgbs, axis=0)
         self.std = np.std(rgbs, axis=0)
         self.rgb = list(map(int, self.mean))
+        self.sample_size = (self.cursor.radius * 2) ** 2
+        self.point_x = x
+        self.point_y = y
         self.update_text()
         self.repaint()
 
@@ -275,15 +281,14 @@ class Example(QtGui.QMainWindow):
             ('mean', str(list(map(int, self.mean)))),
             ('median', str(list(map(int, self.median)))),
             ('std', str(list(map(int, self.std)))),
-            ('point', '({}, {})'.format(self.cursor.x, self.cursor.y)),
-            ('size', str((self.cursor.radius * 2) ** 2)),
+            ('point', '({}, {})'.format(self.point_x, self.point_y)),
+            ('size', self.sample_size),
         ]
         total_w = 25
         for (k, v) in display_items:
             s = '{}:{:>{}}\n'.format(str(k), str(v), total_w - len(str(k)))
             result += s
         self.display_area.setText(result)
-
 
     def paintEvent(self, event):
         self.canvas.draw()
