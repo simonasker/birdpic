@@ -173,7 +173,7 @@ class Example(QtGui.QMainWindow):
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
         self.display_area.setFixedWidth(200)
-        self.display_area.setFontFamily('monospace')
+        self.display_area.setCurrentFont(QtGui.QFont('Courier New', 8))
         layout.addWidget(self.display_area)
 
         self.save_button = QtGui.QPushButton('Save', self)
