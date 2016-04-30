@@ -79,15 +79,6 @@ class Example(QtGui.QMainWindow):
         self.file_index = 0
         self.files = []
 
-        self.genus_items = [
-            'foo',
-            'bar',
-            'baz',
-        ]
-        self.species_items = self.genus_items
-        self.ssp_items = self.genus_items
-        self.field_items = self.genus_items
-
         self.mean = [0, 0, 0]
         self.median = [0, 0, 0]
         self.var = [0, 0, 0]
@@ -108,6 +99,7 @@ class Example(QtGui.QMainWindow):
         side_panel_vbox = self.create_side_panel()
 
         self.load_species_data()
+        self.load_field_data()
 
         self.create_menubar()
 
@@ -124,6 +116,13 @@ class Example(QtGui.QMainWindow):
         genus = list(self.species_data.keys())
         self.genus_edit.addItems(genus)
         self.select_genus(genus[0])
+
+    def load_field_data(self):
+        with open('fields.csv') as f:
+            lines = f.readlines()
+        for l in lines:
+            fid, accr, name = l.strip().split(',')
+            self.field_edit.addItem(name)
 
     def connect_mouse_events(self):
         self.figure.canvas.mpl_connect(
@@ -175,7 +174,7 @@ class Example(QtGui.QMainWindow):
         self.render_area = RenderArea(self)
         layout.addWidget(self.render_area)
 
-        self.file_label = QtGui.QLabel('Filename')
+        self.file_label = QtGui.QLabel('')
         layout.addWidget(self.file_label)
 
         self.species_group = QtGui.QGroupBox('Species')
@@ -210,7 +209,6 @@ class Example(QtGui.QMainWindow):
         self.field_hbox = QtGui.QHBoxLayout()
         self.field_label = QtGui.QLabel('Field:')
         self.field_edit = QtGui.QComboBox(self)
-        self.field_edit.addItems(self.field_items)
         self.field_hbox.addWidget(self.field_label)
         self.field_hbox.addWidget(self.field_edit)
         layout.addLayout(self.field_hbox)
