@@ -110,6 +110,8 @@ class Example(QtGui.QMainWindow):
 
         side_panel_vbox = self.create_side_panel()
 
+        self.create_menubar()
+
         main_hbox = QtGui.QHBoxLayout()
         main_hbox.addLayout(plt_vbox)
         main_hbox.addLayout(side_panel_vbox)
