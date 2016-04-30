@@ -70,6 +70,8 @@ class Example(QtGui.QMainWindow):
         self.statusBar()
 
         self.figure, self.ax = plt.subplots()
+        self.ax.get_xaxis().set_visible(False)
+        self.ax.get_yaxis().set_visible(False)
         self.cursor = Cursor(self.figure.axes[0])
         self.file_index = 0
         self.files = []
@@ -200,6 +202,8 @@ class Example(QtGui.QMainWindow):
         self.img = mpimg.imread(self.files[self.file_index])
         plt.imshow(self.img)
         self.cursor.reset(self.figure.axes[0])
+        self.figure.axes[0].get_xaxis().set_visible(False)
+        self.figure.axes[0].get_yaxis().set_visible(False)
         self.repaint()
 
     def showDialog(self):
