@@ -184,6 +184,10 @@ class Example(QtGui.QMainWindow):
         self.prev_button = QtGui.QPushButton('<', self)
         self.prev_button.clicked.connect(self.prev_file)
         self.prev_next_hbox.addWidget(self.prev_button)
+
+        self.filenum_label = QtGui.QLabel('')
+        self.prev_next_hbox.addWidget(self.filenum_label)
+
         self.next_button = QtGui.QPushButton('>', self)
         self.next_button.clicked.connect(self.next_file)
         self.prev_next_hbox.addWidget(self.next_button)
@@ -269,6 +273,10 @@ class Example(QtGui.QMainWindow):
         self.canvas.draw()
         self.update_text()
         self.file_label.setText(self.get_file_name())
+        self.filenum_label.setText('{}/{}'.format(
+            self.file_index + 1 if len(self.files) > 0 else 0,
+            len(self.files),
+        ))
 
 
 class RenderArea(QtGui.QWidget):
