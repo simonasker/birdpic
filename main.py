@@ -148,11 +148,18 @@ class Example(QtGui.QMainWindow):
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
+        select_species = QtGui.QAction(
+            QtGui.QIcon('open.png'), 'Select species', self)
+        select_species.setStatusTip('Select species')
+        select_species.triggered.connect(self.show_species_dialog)
+
         menubar = self.menuBar()
 
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openFile)
         fileMenu.addAction(exitAction)
+        fileMenu.addSeparator()
+        fileMenu.addAction(select_species)
 
     def select_genus(self, event):
         self.genus = event
@@ -203,6 +210,10 @@ class Example(QtGui.QMainWindow):
         self.ssp_hbox.addWidget(self.ssp_edit)
         self.species_group_vbox.addLayout(self.ssp_hbox)
 
+        self.sp_button = QtGui.QPushButton('Select species', self)
+        self.sp_button.clicked.connect(self.show_species_dialog)
+        self.species_group_vbox.addWidget(self.sp_button)
+
         self.species_group.setLayout(self.species_group_vbox)
         layout.addWidget(self.species_group)
 
@@ -246,6 +257,11 @@ class Example(QtGui.QMainWindow):
         self.figure.axes[0].get_xaxis().set_visible(False)
         self.figure.axes[0].get_yaxis().set_visible(False)
         self.repaint()
+
+    def show_species_dialog(self):
+        dlg = SpeciesDialog(self)
+        if dlg.exec_():
+            print(dlg.species)
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
@@ -342,6 +358,25 @@ class RenderArea(QtGui.QWidget):
         col = QtGui.QColor(*self.parent.rgb)
         qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
+
+
+class SpeciesDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.button = QtGui.QPushButton('this is a button')
+        self.button.clicked.connect(self.set_species)
+
+        main_layout = QtGui.QVBoxLayout()
+        main_layout.addWidget(self.button)
+        self.setLayout(main_layout)
+
+        self.setWindowTitle('Select species')
+        self.resize(500, 300)
+
+    def set_species(self):
+        self.species = 42
+        self.accept()
 
 
 def main():
