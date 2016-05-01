@@ -80,6 +80,7 @@ class Example(QtGui.QMainWindow):
         self.file_index = 0
         self.files = []
 
+        self.taxon = 0
         self.mean = [0, 0, 0]
         self.median = [0, 0, 0]
         self.var = [0, 0, 0]
@@ -262,7 +263,7 @@ class Example(QtGui.QMainWindow):
     def show_species_dialog(self):
         dlg = SpeciesDialog(self)
         if dlg.exec_():
-            print(dlg.species)
+            self.taxon = dlg.taxon
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
@@ -321,6 +322,7 @@ class Example(QtGui.QMainWindow):
     def update_text(self):
         result = ""
         display_items = [
+            ('taxon', self.taxon),
             ('genus', self.genus_edit.currentText()),
             ('species', self.species_edit.currentText()),
             ('ssp', self.ssp_edit.currentText()),
@@ -404,15 +406,23 @@ class SpeciesDialog(QtGui.QDialog):
         self.list_view.setAlternatingRowColors(True)
         self.list_view.setSortingEnabled(True)
         self.list_view.setModel(self.proxy_model)
+        self.list_view.doubleClicked.connect(self.select)
+        self.list_view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         main_layout.addWidget(self.list_view)
 
-        self.button = QtGui.QPushButton('this is a button')
-        self.button.clicked.connect(self.set_species)
+        self.button = QtGui.QPushButton('Select')
+        self.button.clicked.connect(self.select)
         main_layout.addWidget(self.button)
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
         self.resize(800, 500)
+
+    def select(self, event):
+        indexes = self.list_view.selectedIndexes()
+        if indexes:
+            self.taxon = indexes[0].data()
+            self.accept()
 
     def filter_changed(self):
         pattern = self.filter_pattern_edit.text()
@@ -433,10 +443,6 @@ class SpeciesDialog(QtGui.QDialog):
                     if i == 0:
                         c = int(c)
                     self.model.setData(self.model.index(0, i), c)
-
-    def set_species(self):
-        self.species = 42
-        self.accept()
 
 
 def main():
