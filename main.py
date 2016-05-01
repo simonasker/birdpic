@@ -103,9 +103,9 @@ class Example(QtGui.QMainWindow):
             self.toolbar = NavigationToolbar2QT(self.canvas, self)
             plt_vbox.addWidget(self.toolbar)
 
-        side_panel_vbox = self.create_side_panel()
-
         self.load_plumreg_data()
+
+        side_panel_vbox = self.create_side_panel()
 
         self.create_menubar()
 
@@ -117,11 +117,12 @@ class Example(QtGui.QMainWindow):
         self.connect_mouse_events()
 
     def load_plumreg_data(self):
+        self.plumregs = []
         with open('fields.csv') as f:
             lines = f.readlines()
         for l in lines:
-            fid, accr, name = l.strip().split(',')
-            self.boxes['plumreg'].addItem(name)
+            index, accr, name = l.strip().split(',')
+            self.plumregs.append((accr, name))
 
     def connect_mouse_events(self):
         self.figure.canvas.mpl_connect(
@@ -180,35 +181,35 @@ class Example(QtGui.QMainWindow):
         layout.addWidget(self.species_group)
 
         comboboxes = [
-            ('plumreg', []),
-            ('sex', [
+            ('plumreg', 'Plumage region', [n for a, n in self.plumregs]),
+            ('sex', 'Sex', [
                 'M',
                 'F',
                 '?',
             ]),
-            ('age', [
+            ('age', 'Age', [
                 'Pullus',
                 'Juvenile',
                 'Subadult',
                 'Adult',
                 'Unknown',
             ]),
-            ('imgsrc', [
+            ('imgsrc', 'Image source', [
                 'HBW',
                 'Flickr',
                 'Ecco',
                 'Other',
             ]),
-            ('imgtype', [
+            ('imgtype', 'Image type', [
                 'Painting',
                 'Photo',
             ]),
         ]
         self.boxes = {}
 
-        for cb, items in comboboxes:
+        for cb, label, items in comboboxes:
             cb_layout = QtGui.QHBoxLayout()
-            cb_label = QtGui.QLabel(cb)
+            cb_label = QtGui.QLabel(label)
             self.boxes[cb] = QtGui.QComboBox(self)
             self.boxes[cb].addItems(items)
             cb_layout.addWidget(cb_label)
@@ -317,9 +318,11 @@ class Example(QtGui.QMainWindow):
 
     def update_text(self):
         result = ""
+
+        plumreg_accr = self.plumregs[self.boxes['plumreg'].currentIndex()][0]
         display_items = [
             ('taxon', self.taxon),
-            ('plumreg', self.boxes['plumreg'].currentText()),
+            ('plumreg', plumreg_accr),
             ('mean', str(list(map(int, self.mean)))),
             ('median', str(list(map(int, self.median)))),
             ('std', str(list(map(int, self.std)))),
