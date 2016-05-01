@@ -364,9 +364,14 @@ class RenderArea(QtGui.QWidget):
 class SpeciesDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-
-        self.button = QtGui.QPushButton('this is a button')
-        self.button.clicked.connect(self.set_species)
+        self.headings = [
+            'Taxon',
+            'First name',
+            'Last name',
+            'Genus',
+            'Species',
+            'Subspecies',
+        ]
 
         self.proxy_model = QtGui.QSortFilterProxyModel()
         self.proxy_model.setDynamicSortFilter(True)
@@ -376,32 +381,48 @@ class SpeciesDialog(QtGui.QDialog):
 
         self.proxy_model.setSourceModel(self.model)
 
+        main_layout = QtGui.QVBoxLayout()
+
+        filter_hbox = QtGui.QHBoxLayout()
+        filter_label = QtGui.QLabel('Filter')
+        filter_hbox.addWidget(filter_label)
+
+        self.filter_pattern_edit = QtGui.QLineEdit()
+        self.filter_pattern_edit.textChanged.connect(self.filter_changed)
+        filter_hbox.addWidget(self.filter_pattern_edit)
+        main_layout.addLayout(filter_hbox)
+
+        self.filter_column_box = QtGui.QComboBox(self)
+        for h in self.headings:
+            self.filter_column_box.addItem(h)
+        self.filter_column_box.currentIndexChanged.connect(
+            self.proxy_model.setFilterKeyColumn)
+        filter_hbox.addWidget(self.filter_column_box)
+
         self.list_view = QtGui.QTreeView()
         self.list_view.setRootIsDecorated(False)
         self.list_view.setAlternatingRowColors(True)
         self.list_view.setSortingEnabled(True)
         self.list_view.setModel(self.proxy_model)
-
-        main_layout = QtGui.QVBoxLayout()
         main_layout.addWidget(self.list_view)
+
+        self.button = QtGui.QPushButton('this is a button')
+        self.button.clicked.connect(self.set_species)
         main_layout.addWidget(self.button)
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
         self.resize(800, 500)
 
+    def filter_changed(self):
+        pattern = self.filter_pattern_edit.text()
+        regex = QtCore.QRegExp(pattern, QtCore.Qt.CaseInsensitive, 0)
+        self.proxy_model.setFilterRegExp(regex)
+
     def create_model(self):
-        heading = [
-            'Taxon',
-            'First name',
-            'Last name',
-            'Genus',
-            'Species',
-            'Subspecies',
-        ]
-        self.model = QtGui.QStandardItemModel(0, len(heading), self)
-        for i in range(len(heading)):
-            self.model.setHeaderData(i, QtCore.Qt.Horizontal, heading[i])
+        self.model = QtGui.QStandardItemModel(0, len(self.headings), self)
+        for i in range(len(self.headings)):
+            self.model.setHeaderData(i, QtCore.Qt.Horizontal, self.headings[i])
 
     def insert_data(self):
         with open('species.csv', newline='') as csvfile:
