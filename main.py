@@ -79,6 +79,8 @@ class Example(QtGui.QMainWindow):
         self.file_index = 0
         self.files = []
 
+        self.data = []
+
         self.taxon = 0
         self.mean = [0, 0, 0]
         self.median = [0, 0, 0]
@@ -143,23 +145,23 @@ class Example(QtGui.QMainWindow):
         openFile.setStatusTip('Open new file')
         openFile.triggered.connect(self.showDialog)
 
+        save_action = QtGui.QAction(QtGui.QIcon('save.png'), 'Save', self)
+        save_action.setShortcut('Ctrl+S')
+        save_action.setStatusTip('Save data to file')
+        save_action.triggered.connect(self.save)
+
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
-        select_species = QtGui.QAction(
-            QtGui.QIcon('open.png'), 'Select species', self)
-        select_species.setStatusTip('Select species')
-        select_species.triggered.connect(self.show_species_dialog)
-
         menubar = self.menuBar()
 
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openFile)
-        fileMenu.addAction(exitAction)
+        fileMenu.addAction(save_action)
         fileMenu.addSeparator()
-        fileMenu.addAction(select_species)
+        fileMenu.addAction(exitAction)
 
     def create_side_panel(self):
         layout = QtGui.QVBoxLayout()
@@ -221,9 +223,9 @@ class Example(QtGui.QMainWindow):
         self.display_area.setCurrentFont(QtGui.QFont('Courier New', 8))
         layout.addWidget(self.display_area)
 
-        self.save_button = QtGui.QPushButton('Save', self)
-        self.save_button.clicked.connect(self.save)
-        layout.addWidget(self.save_button)
+        self.insert_button = QtGui.QPushButton('Insert', self)
+        self.insert_button.clicked.connect(self.insert)
+        layout.addWidget(self.insert_button)
 
         self.prev_next_hbox = QtGui.QHBoxLayout()
         self.prev_button = QtGui.QPushButton('<', self)
@@ -256,7 +258,7 @@ class Example(QtGui.QMainWindow):
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
-            self, 'Open file', '/home/simon/git/birdpic', '*.jpg *.png')
+            self, 'Open file', os.getcwd(), '*.jpg *.png')
         # TODO Do some error checking here
         self.file_index = 0
         self.reset_figure()
@@ -277,8 +279,23 @@ class Example(QtGui.QMainWindow):
         else:
             return os.path.basename(self.files[self.file_index])
 
+    def insert(self):
+        new_sample = [self.taxon, self.sample_size]
+        self.data.append(map(str, new_sample))
+
     def save(self):
-        print('Saving...')
+        suggested_file = os.path.join(os.getcwd(), 'test.txt')
+        file_name = QtGui.QFileDialog.getSaveFileName(
+            self, 'Save to file', suggested_file)
+
+        self.col_heads = ['taxon', 'size']
+        with open(file_name, 'w') as f:
+            col_heads = ','.join(self.col_heads)
+            f.write('{}\n'.format(col_heads))
+            for d in self.data:
+                sample = ','.join(d)
+                f.write('{}\n'.format(sample))
+        self.data = []
 
     def on_move(self, event):
         self.repaint()
