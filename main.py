@@ -2,7 +2,6 @@
 
 import sys
 import os
-import json
 import csv
 
 from PyQt4 import QtGui
@@ -100,8 +99,7 @@ class Example(QtGui.QMainWindow):
 
         side_panel_vbox = self.create_side_panel()
 
-        self.load_species_data()
-        self.load_field_data()
+        self.load_plumreg_data()
 
         self.create_menubar()
 
@@ -112,19 +110,12 @@ class Example(QtGui.QMainWindow):
         self.main.setLayout(main_hbox)
         self.connect_mouse_events()
 
-    def load_species_data(self):
-        with open('species.json') as f:
-            self.species_data = json.load(f)
-        genus = list(self.species_data.keys())
-        self.genus_edit.addItems(genus)
-        self.select_genus(genus[0])
-
-    def load_field_data(self):
+    def load_plumreg_data(self):
         with open('fields.csv') as f:
             lines = f.readlines()
         for l in lines:
             fid, accr, name = l.strip().split(',')
-            self.field_edit.addItem(name)
+            self.boxes['plumreg'].addItem(name)
 
     def connect_mouse_events(self):
         self.figure.canvas.mpl_connect(
@@ -163,20 +154,6 @@ class Example(QtGui.QMainWindow):
         fileMenu.addSeparator()
         fileMenu.addAction(select_species)
 
-    def select_genus(self, event):
-        self.genus = event
-        self.species_edit.clear()
-        species = list(self.species_data[self.genus].keys())
-        self.species_edit.addItems(species)
-        self.select_species(species[0])
-
-    def select_species(self, event):
-        self.species = event
-        self.ssp_edit.clear()
-        subspecies = self.species_data[self.genus][self.species]
-        self.ssp_edit.addItems(subspecies)
-        self.ssp = subspecies[0]
-
     def create_side_panel(self):
         layout = QtGui.QVBoxLayout()
 
@@ -189,29 +166,6 @@ class Example(QtGui.QMainWindow):
         self.species_group = QtGui.QGroupBox('Species')
         self.species_group_vbox = QtGui.QVBoxLayout()
 
-        self.genus_hbox = QtGui.QHBoxLayout()
-        self.genus_label = QtGui.QLabel('Genus:')
-        self.genus_edit = QtGui.QComboBox(self)
-        self.genus_edit.activated[str].connect(self.select_genus)
-        self.genus_hbox.addWidget(self.genus_label)
-        self.genus_hbox.addWidget(self.genus_edit)
-        self.species_group_vbox.addLayout(self.genus_hbox)
-
-        self.species_hbox = QtGui.QHBoxLayout()
-        self.species_label = QtGui.QLabel('Species:')
-        self.species_edit = QtGui.QComboBox(self)
-        self.species_edit.activated[str].connect(self.select_species)
-        self.species_hbox.addWidget(self.species_label)
-        self.species_hbox.addWidget(self.species_edit)
-        self.species_group_vbox.addLayout(self.species_hbox)
-
-        self.ssp_hbox = QtGui.QHBoxLayout()
-        self.ssp_label = QtGui.QLabel('SSP:')
-        self.ssp_edit = QtGui.QComboBox(self)
-        self.ssp_hbox.addWidget(self.ssp_label)
-        self.ssp_hbox.addWidget(self.ssp_edit)
-        self.species_group_vbox.addLayout(self.ssp_hbox)
-
         self.sp_button = QtGui.QPushButton('Select species', self)
         self.sp_button.clicked.connect(self.show_species_dialog)
         self.species_group_vbox.addWidget(self.sp_button)
@@ -219,12 +173,41 @@ class Example(QtGui.QMainWindow):
         self.species_group.setLayout(self.species_group_vbox)
         layout.addWidget(self.species_group)
 
-        self.field_hbox = QtGui.QHBoxLayout()
-        self.field_label = QtGui.QLabel('Field:')
-        self.field_edit = QtGui.QComboBox(self)
-        self.field_hbox.addWidget(self.field_label)
-        self.field_hbox.addWidget(self.field_edit)
-        layout.addLayout(self.field_hbox)
+        comboboxes = [
+            ('plumreg', []),
+            ('sex', [
+                'M',
+                'F',
+                '?',
+            ]),
+            ('age', [
+                'Pullus',
+                'Juvenile',
+                'Subadult',
+                'Adult',
+                'Unknown',
+            ]),
+            ('imgsrc', [
+                'HBW',
+                'Flickr',
+                'Ecco',
+                'Other',
+            ]),
+            ('imgtype', [
+                'Painting',
+                'Photo',
+            ]),
+        ]
+        self.boxes = {}
+
+        for cb, items in comboboxes:
+            cb_layout = QtGui.QHBoxLayout()
+            cb_label = QtGui.QLabel(cb)
+            self.boxes[cb] = QtGui.QComboBox(self)
+            self.boxes[cb].addItems(items)
+            cb_layout.addWidget(cb_label)
+            cb_layout.addWidget(self.boxes[cb])
+            layout.addLayout(cb_layout)
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
@@ -323,10 +306,7 @@ class Example(QtGui.QMainWindow):
         result = ""
         display_items = [
             ('taxon', self.taxon),
-            ('genus', self.genus_edit.currentText()),
-            ('species', self.species_edit.currentText()),
-            ('ssp', self.ssp_edit.currentText()),
-            ('field', self.field_edit.currentText()),
+            ('plumreg', self.boxes['plumreg'].currentText()),
             ('mean', str(list(map(int, self.mean)))),
             ('median', str(list(map(int, self.median)))),
             ('std', str(list(map(int, self.std)))),
@@ -367,12 +347,15 @@ class SpeciesDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.headings = [
-            'Taxon',
+            'Taxon ID',
             'First name',
             'Last name',
             'Genus',
             'Species',
             'Subspecies',
+            'Taxon Code',
+            'S&A Tax Order',
+            'Crook 64 Order',
         ]
 
         self.proxy_model = QtGui.QSortFilterProxyModel()
@@ -416,7 +399,7 @@ class SpeciesDialog(QtGui.QDialog):
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
-        self.resize(800, 500)
+        self.resize(1000, 500)
 
     def select(self, event):
         indexes = self.list_view.selectedIndexes()
