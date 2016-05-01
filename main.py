@@ -5,7 +5,7 @@ import os
 import json
 
 from PyQt4 import QtGui
-# from PyQt4 import QtCore
+from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
@@ -367,12 +367,44 @@ class SpeciesDialog(QtGui.QDialog):
         self.button = QtGui.QPushButton('this is a button')
         self.button.clicked.connect(self.set_species)
 
+        self.proxy_model = QtGui.QSortFilterProxyModel()
+        self.proxy_model.setDynamicSortFilter(True)
+
+        self.create_model()
+        self.insert_data()
+
+        self.proxy_model.setSourceModel(self.model)
+
+        self.list_view = QtGui.QTreeView()
+        self.list_view.setRootIsDecorated(False)
+        self.list_view.setAlternatingRowColors(True)
+        self.list_view.setSortingEnabled(True)
+        self.list_view.setModel(self.proxy_model)
+
         main_layout = QtGui.QVBoxLayout()
+        main_layout.addWidget(self.list_view)
         main_layout.addWidget(self.button)
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
         self.resize(500, 300)
+
+    def create_model(self):
+        heading = [
+            'Taxon',
+            'Genus',
+            'Species',
+            'Subspecies',
+        ]
+        self.model = QtGui.QStandardItemModel(0, len(heading), self)
+        for i in range(len(heading)):
+            self.model.setHeaderData(i, QtCore.Qt.Horizontal, heading[i])
+
+    def insert_data(self):
+        self.model.insertRow(0)
+        self.model.setData(self.model.index(0, 0), 'foo')
+        self.model.setData(self.model.index(0, 1), 'bar')
+        self.model.setData(self.model.index(0, 2), 'baz')
 
     def set_species(self):
         self.species = 42
