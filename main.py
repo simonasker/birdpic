@@ -84,6 +84,12 @@ class Example(QtGui.QMainWindow):
         self.median = [0, 0, 0]
         self.var = [0, 0, 0]
         self.std = [0, 0, 0]
+        self.r_min = 0
+        self.r_max = 0
+        self.g_min = 0
+        self.g_max = 0
+        self.b_min = 0
+        self.b_max = 0
         self.sample_size = 0
         self.point_x = 0
         self.point_y = 0
@@ -211,7 +217,6 @@ class Example(QtGui.QMainWindow):
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
-        self.display_area.setFixedWidth(200)
         self.display_area.setCurrentFont(QtGui.QFont('Courier New', 8))
         layout.addWidget(self.display_area)
 
@@ -293,6 +298,14 @@ class Example(QtGui.QMainWindow):
         self.var = np.var(rgbs, axis=0)
         self.std = np.std(rgbs, axis=0)
         self.rgb = list(map(int, self.mean))
+
+        self.r_min = np.amin(rgbs[:, 0])
+        self.r_max = np.amax(rgbs[:, 0])
+        self.g_min = np.amin(rgbs[:, 1])
+        self.g_max = np.amax(rgbs[:, 1])
+        self.b_min = np.amin(rgbs[:, 2])
+        self.b_max = np.amax(rgbs[:, 2])
+
         self.sample_size = (self.cursor.radius * 2) ** 2
         self.point_x = x
         self.point_y = y
@@ -310,10 +323,16 @@ class Example(QtGui.QMainWindow):
             ('mean', str(list(map(int, self.mean)))),
             ('median', str(list(map(int, self.median)))),
             ('std', str(list(map(int, self.std)))),
+            ('r_min', self.r_min),
+            ('r_max', self.r_max),
+            ('g_min', self.g_min),
+            ('g_max', self.g_max),
+            ('b_min', self.b_min),
+            ('b_max', self.b_max),
             ('point', '({}, {})'.format(self.point_x, self.point_y)),
             ('size', self.sample_size),
         ]
-        total_w = 25
+        total_w = 33
         for (k, v) in display_items:
             s = '{}:{:>{}}\n'.format(str(k), str(v), total_w - len(str(k)))
             result += s
