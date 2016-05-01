@@ -3,6 +3,7 @@
 import sys
 import os
 import json
+import csv
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -387,11 +388,13 @@ class SpeciesDialog(QtGui.QDialog):
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
-        self.resize(500, 300)
+        self.resize(800, 500)
 
     def create_model(self):
         heading = [
             'Taxon',
+            'First name',
+            'Last name',
             'Genus',
             'Species',
             'Subspecies',
@@ -401,10 +404,14 @@ class SpeciesDialog(QtGui.QDialog):
             self.model.setHeaderData(i, QtCore.Qt.Horizontal, heading[i])
 
     def insert_data(self):
-        self.model.insertRow(0)
-        self.model.setData(self.model.index(0, 0), 'foo')
-        self.model.setData(self.model.index(0, 1), 'bar')
-        self.model.setData(self.model.index(0, 2), 'baz')
+        with open('species.csv', newline='') as csvfile:
+            species = csv.reader(csvfile, delimiter=',')
+            for row in species:
+                self.model.insertRow(0)
+                for i, c in enumerate(row):
+                    if i == 0:
+                        c = int(c)
+                    self.model.setData(self.model.index(0, i), c)
 
     def set_species(self):
         self.species = 42
