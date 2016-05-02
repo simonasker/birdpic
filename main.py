@@ -6,13 +6,24 @@ import csv
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
+
+# from PySide import QtGui
+# from PySide import QtCore
+# import matplotlib
+# matplotlib.use('Qt4Agg')
+# matplotlib.rcParams['backend.qt4'] = 'PySide'
+
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 
-# import skimage.draw
+import skimage.color
+
+SPECIES_FILE = 'data/ploceide_taxon.csv'
+PLUMREG_FILE = 'data/plumreg.csv'
+
 
 COMPACTNESS = 35
 N_SEGMENTS = 200
@@ -64,6 +75,12 @@ class Cursor(object):
 class Example(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
+        styleName = 'Cleanlooks'
+        QtGui.QApplication.setStyle(QtGui.QStyleFactory.create(styleName))
+
+        # self.originalPalette = QtGui.QApplication.palette()
+        # QtGui.QApplication.setPalette(self.originalPalette)
+        QtGui.QApplication.setPalette(QtGui.QApplication.style().standardPalette())
         self.init_ui()
 
     def init_ui(self):
@@ -120,7 +137,7 @@ class Example(QtGui.QMainWindow):
 
     def load_plumreg_data(self):
         self.plumregs = []
-        with open('fields.csv') as f:
+        with open(PLUMREG_FILE) as f:
             lines = f.readlines()
         for l in lines:
             index, accr, name = l.strip().split(',')
@@ -220,7 +237,8 @@ class Example(QtGui.QMainWindow):
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
-        self.display_area.setCurrentFont(QtGui.QFont('Courier New', 8))
+        # self.display_area.setCurrentFont(QtGui.QFont('Courier New', 8))
+        self.display_area.setFontFamily('Monospace')
         layout.addWidget(self.display_area)
 
         self.insert_button = QtGui.QPushButton('Insert', self)
@@ -309,6 +327,9 @@ class Example(QtGui.QMainWindow):
             x1, x2 = x - radius + 2, x + radius + 2
             y1, y2 = y - radius + 2, y + radius + 2
             selected = self.img[y1:y2, x1:x2]
+
+        selected = skimage.color.rgb2lab(selected)
+        # print(selected_hsv)
         a, b, _ = selected.shape
         rgbs = selected.reshape((a * b, 3))
         self.mean = np.mean(rgbs, axis=0)
@@ -316,6 +337,11 @@ class Example(QtGui.QMainWindow):
         self.var = np.var(rgbs, axis=0)
         self.std = np.std(rgbs, axis=0)
         self.rgb = list(map(int, self.mean))
+
+        print(self.mean[0] * 359)
+        print(self.mean[1] * 100)
+        print(self.mean[2] * 100)
+        print('=====================')
 
         self.r_min = np.amin(rgbs[:, 0])
         self.r_max = np.amax(rgbs[:, 0])
@@ -340,7 +366,7 @@ class Example(QtGui.QMainWindow):
         display_items = [
             ('taxon', self.taxon),
             ('plumreg', plumreg_accr),
-            ('mean', str(list(map(int, self.mean)))),
+            ('mean', str(list(self.mean))),
             ('median', str(list(map(int, self.median)))),
             ('std', str(list(map(int, self.std)))),
             ('r_min', self.r_min),
@@ -377,7 +403,8 @@ class RenderArea(QtGui.QWidget):
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
-        col = QtGui.QColor(*self.parent.rgb)
+        # col = QtGui.QColor(*self.parent.rgb)
+        col = QtGui.QColor(0, 0, 0)
         qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
 
@@ -457,7 +484,7 @@ class SpeciesDialog(QtGui.QDialog):
             self.model.setHeaderData(i, QtCore.Qt.Horizontal, self.headings[i])
 
     def insert_data(self):
-        with open('species.csv', newline='') as csvfile:
+        with open(SPECIES_FILE, newline='') as csvfile:
             species = csv.reader(csvfile, delimiter=',')
             for row in species:
                 self.model.insertRow(0)
