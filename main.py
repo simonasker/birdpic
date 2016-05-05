@@ -94,7 +94,7 @@ class Sample(object):
         self.data['rgb_max'] = [0, 0, 0]
 
     def get_csv(self):
-        return 'ofoo'
+        return ','.join(map(str, self.data.values()))
 
     def get_display(self):
         items = [
@@ -261,9 +261,12 @@ class Example(QtGui.QMainWindow):
             cb_label = QtGui.QLabel(label)
             self.boxes[cb] = QtGui.QComboBox(self)
             self.boxes[cb].addItems(items)
+            self.boxes[cb].currentIndexChanged.connect(self.combo_change)
             grid.addWidget(cb_label, i, 0, QtCore.Qt.AlignRight)
             grid.addWidget(self.boxes[cb], i, 1)
             i += 1
+        # Initialize the combo box sample fields
+        self.combo_change()
         layout.addLayout(grid)
 
         self.display_area = QtGui.QTextEdit(self)
@@ -291,7 +294,18 @@ class Example(QtGui.QMainWindow):
 
         return layout
 
+    def combo_change(self, *args):
+        self.sample.data['sex'] = self.boxes['sex'].currentText().lower()
+        self.sample.data['age'] = self.boxes['age'].currentText().lower()
+        self.sample.data['imgsrc'] = self.boxes['imgsrc'].currentText().lower()
+        self.sample.data['imgtype'] = (
+            self.boxes['imgtype'].currentText().lower())
+        plumreg_accr = self.plumregs[self.boxes['plumreg'].currentIndex()][0]
+        self.sample.data['plumreg'] = plumreg_accr.lower()
+
     def reset_figure(self):
+        self.sample.data['imgfile'] = os.path.basename(
+            self.files[self.file_index])
         self.figure.clear()
         self.img = mpimg.imread(self.files[self.file_index])
         plt.imshow(self.img)
