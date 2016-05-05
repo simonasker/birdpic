@@ -121,6 +121,8 @@ class Example(QtGui.QMainWindow):
         self.cursor = Cursor(self.figure.axes[0])
         self.file_index = 0
         self.files = []
+        # TODO For testing, remove
+        self.files = ['img/tux.png']
 
         self.data = []
 
@@ -347,21 +349,18 @@ class Example(QtGui.QMainWindow):
             selected = self.img[y1:y2, x1:x2]
 
         # selected = skimage.color.rgb2lab(selected)
-        a, b, _ = selected.shape
-        rgbs = selected.reshape((a * b, 3))
-        self.sample.data['rgb_mean'] = np.mean(rgbs, axis=0)
-        self.sample.data['rgb_std'] = np.std(rgbs, axis=0)
+        a, b, c = selected.shape
+        rgbs = selected.reshape((a * b, c))
 
-        r_min = np.amin(rgbs[:, 0])
-        g_min = np.amin(rgbs[:, 1])
-        b_min = np.amin(rgbs[:, 2])
-        self.sample.data['rgb_min'] = [r_min, g_min, b_min]
+        mean = list(np.mean(rgbs, axis=0))[:3]
+        std = list(np.std(rgbs, axis=0))[:3]
+        rgb_min = [np.amin(rgbs[:, i]) for i in range(3)]
+        rgb_max = [np.amax(rgbs[:, i]) for i in range(3)]
 
-        r_max = np.amax(rgbs[:, 0])
-        g_max = np.amax(rgbs[:, 1])
-        b_max = np.amax(rgbs[:, 2])
-        self.sample.data['rgb_max'] = [r_max, g_max, b_max]
-
+        self.sample.data['rgb_mean'] = mean
+        self.sample.data['rgb_std'] = std
+        self.sample.data['rgb_min'] = rgb_min
+        self.sample.data['rgb_max'] = rgb_max
         self.sample.data['size'] = (self.cursor.radius * 2) ** 2
         self.sample.data['x'] = x
         self.sample.data['y'] = y
@@ -374,10 +373,10 @@ class Example(QtGui.QMainWindow):
     def update_text(self):
         result = ""
         display_items = [
-            ('mean', str(list(map(int, self.sample.data['rgb_mean'])))),
-            ('std', str(list(map(int, self.sample.data['rgb_std'])))),
-            ('min', str(list(map(int, self.sample.data['rgb_min'])))),
-            ('max', str(list(map(int, self.sample.data['rgb_max'])))),
+            ('mean', self.sample.data['rgb_mean']),
+            ('std', self.sample.data['rgb_std']),
+            ('min', self.sample.data['rgb_min']),
+            ('max', self.sample.data['rgb_max']),
             ('size', self.sample.data['size']),
             ('x', self.sample.data['x']),
             ('y', self.sample.data['y']),
@@ -407,7 +406,9 @@ class RenderArea(QtGui.QWidget):
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
-        rgb = list(map(int, self.parent.sample.data['rgb_mean']))
+
+        def f(x): return int(x * 255)
+        rgb = list(map(f, self.parent.sample.data['rgb_mean']))[:3]
         col = QtGui.QColor(*rgb)
         qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
