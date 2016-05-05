@@ -270,9 +270,10 @@ class Example(QtGui.QMainWindow):
         self.repaint()
 
     def show_species_dialog(self):
-        dlg = SpeciesDialog(self)
+        dlg = SimpleSpeciesDialog(self)
         if dlg.exec_():
-            self.taxon = dlg.taxon
+            self.ssp = dlg.ssp
+            print(self.ssp)
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
@@ -407,6 +408,49 @@ class RenderArea(QtGui.QWidget):
         col = QtGui.QColor(0, 0, 0)
         qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
+
+
+class SimpleSpeciesDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        main_layout = QtGui.QVBoxLayout()
+
+        genus_hbox = QtGui.QHBoxLayout()
+        genus_label = QtGui.QLabel('Genus')
+        genus_hbox.addWidget(genus_label)
+        self.genus_edit = QtGui.QLineEdit()
+        genus_hbox.addWidget(self.genus_edit)
+        main_layout.addLayout(genus_hbox)
+
+        sp_hbox = QtGui.QHBoxLayout()
+        sp_label = QtGui.QLabel('Species')
+        sp_hbox.addWidget(sp_label)
+        self.sp_edit = QtGui.QLineEdit()
+        sp_hbox.addWidget(self.sp_edit)
+        main_layout.addLayout(sp_hbox)
+
+        ssp_hbox = QtGui.QHBoxLayout()
+        ssp_label = QtGui.QLabel('Subspecies')
+        ssp_hbox.addWidget(ssp_label)
+        self.ssp_edit = QtGui.QLineEdit()
+        ssp_hbox.addWidget(self.ssp_edit)
+        main_layout.addLayout(ssp_hbox)
+
+        self.button = QtGui.QPushButton('Select')
+        self.button.clicked.connect(self.select)
+        main_layout.addWidget(self.button)
+
+        self.setLayout(main_layout)
+
+        self.setWindowTitle('Select species')
+
+    def select(self):
+        self.ssp = (
+            self.genus_edit.text(),
+            self.sp_edit.text(),
+            self.ssp_edit.text(),
+        )
+        self.accept()
 
 
 class SpeciesDialog(QtGui.QDialog):
