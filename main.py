@@ -206,6 +206,7 @@ class Example(QtGui.QMainWindow):
         self.species_group.setLayout(self.species_group_vbox)
         layout.addWidget(self.species_group)
 
+        grid = QtGui.QGridLayout()
         comboboxes = [
             ('plumreg', 'Plumage region', [n for a, n in self.plumregs]),
             ('sex', 'Sex', [
@@ -233,14 +234,15 @@ class Example(QtGui.QMainWindow):
         ]
         self.boxes = {}
 
+        i = 0
         for cb, label, items in comboboxes:
-            cb_layout = QtGui.QHBoxLayout()
             cb_label = QtGui.QLabel(label)
             self.boxes[cb] = QtGui.QComboBox(self)
             self.boxes[cb].addItems(items)
-            cb_layout.addWidget(cb_label)
-            cb_layout.addWidget(self.boxes[cb])
-            layout.addLayout(cb_layout)
+            grid.addWidget(cb_label, i, 0, QtCore.Qt.AlignRight)
+            grid.addWidget(self.boxes[cb], i, 1)
+            i += 1
+        layout.addLayout(grid)
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
