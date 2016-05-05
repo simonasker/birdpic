@@ -96,7 +96,11 @@ class Example(QtGui.QMainWindow):
         self.file_index = 0
         self.files = []
 
-        self.data = []
+        self.data = {
+            'genus': '',
+            'species': '',
+            'subspecies': '',
+        }
 
         self.taxon = 0
         self.mean = [0, 0, 0]
@@ -192,6 +196,9 @@ class Example(QtGui.QMainWindow):
         self.species_group = QtGui.QGroupBox('Species')
         self.species_group_vbox = QtGui.QVBoxLayout()
 
+        self.ssp_label = QtGui.QLabel('No species selected')
+        self.species_group_vbox.addWidget(self.ssp_label)
+
         self.sp_button = QtGui.QPushButton('Select species', self)
         self.sp_button.clicked.connect(self.show_species_dialog)
         self.species_group_vbox.addWidget(self.sp_button)
@@ -272,8 +279,11 @@ class Example(QtGui.QMainWindow):
     def show_species_dialog(self):
         dlg = SimpleSpeciesDialog(self)
         if dlg.exec_():
-            self.ssp = dlg.ssp
-            print(self.ssp)
+            self.data['genus'] = dlg.ssp[0]
+            self.data['species'] = dlg.ssp[1]
+            self.data['subspecies'] = dlg.ssp[2]
+
+            self.ssp_label.setText(' '.join(dlg.ssp))
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
