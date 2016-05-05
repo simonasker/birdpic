@@ -88,10 +88,21 @@ class Sample(object):
         self.data['x'] = 0
         self.data['y'] = 0
         self.data['size'] = 0
-        self.data['rgb_mean'] = [0, 0, 0]
-        self.data['rgb_std'] = [0, 0, 0]
-        self.data['rgb_min'] = [0, 0, 0]
-        self.data['rgb_max'] = [0, 0, 0]
+        self.data['r_mean'] = 0
+        self.data['g_mean'] = 0
+        self.data['b_mean'] = 0
+        self.data['r_std'] = 0
+        self.data['g_std'] = 0
+        self.data['b_std'] = 0
+        self.data['r_min'] = 0
+        self.data['g_min'] = 0
+        self.data['b_min'] = 0
+        self.data['r_max'] = 0
+        self.data['g_max'] = 0
+        self.data['b_max'] = 0
+
+    def get_csv_head(self):
+        return ','.join(map(str, self.data.keys()))
 
     def get_csv(self):
         return ','.join(map(str, self.data.values()))
@@ -105,7 +116,7 @@ class Sample(object):
         ]
         result = []
         for item in items:
-            value = list(map(lambda x: round(x, 2), self.data[item]))
+            value = 0
             result.append((item, value))
         return result
 
@@ -346,6 +357,7 @@ class Example(QtGui.QMainWindow):
             return os.path.basename(self.files[self.file_index])
 
     def insert(self):
+        print(self.sample.get_csv_head())
         print(self.sample.get_csv())
 
     def save(self):
@@ -379,15 +391,28 @@ class Example(QtGui.QMainWindow):
         a, b, c = selected.shape
         rgbs = selected.reshape((a * b, c))
 
-        mean = list(np.mean(rgbs, axis=0))[:3]
-        std = list(np.std(rgbs, axis=0))[:3]
+        rgb_mean = list(np.mean(rgbs, axis=0))[:3]
+        rgb_std = list(np.std(rgbs, axis=0))[:3]
         rgb_min = [np.amin(rgbs[:, i]) for i in range(3)]
         rgb_max = [np.amax(rgbs[:, i]) for i in range(3)]
 
-        self.sample.data['rgb_mean'] = mean
-        self.sample.data['rgb_std'] = std
-        self.sample.data['rgb_min'] = rgb_min
-        self.sample.data['rgb_max'] = rgb_max
+        self.sample.data['r_mean'] = rgb_mean[0]
+        self.sample.data['g_mean'] = rgb_mean[1]
+        self.sample.data['b_mean'] = rgb_mean[2]
+
+        self.sample.data['r_std'] = rgb_std[0]
+        self.sample.data['g_std'] = rgb_std[1]
+        self.sample.data['b_std'] = rgb_std[2]
+
+        self.sample.data['r_min'] = rgb_min[0]
+        self.sample.data['g_min'] = rgb_min[1]
+        self.sample.data['b_min'] = rgb_min[2]
+
+        self.sample.data['r_max'] = rgb_max[0]
+        self.sample.data['g_max'] = rgb_max[1]
+        self.sample.data['b_max'] = rgb_max[2]
+
+
         self.sample.data['size'] = (self.cursor.radius * 2) ** 2
         self.sample.data['x'] = x
         self.sample.data['y'] = y
@@ -427,8 +452,11 @@ class RenderArea(QtGui.QWidget):
         qp.begin(self)
 
         def f(x): return int(x * 255)
-        rgb = list(map(f, self.parent.sample.data['rgb_mean']))[:3]
-        col = QtGui.QColor(*rgb)
+        col = QtGui.QColor(
+            f(self.parent.sample.data['r_mean']),
+            f(self.parent.sample.data['g_mean']),
+            f(self.parent.sample.data['b_mean']),
+        )
         qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
 
