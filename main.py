@@ -3,6 +3,7 @@
 import sys
 import os
 import csv
+import collections
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -19,7 +20,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 
-import skimage.color
+# import skimage.color
 
 SPECIES_FILE = 'data/ploceide_taxon.csv'
 PLUMREG_FILE = 'data/plumreg.csv'
@@ -72,6 +73,30 @@ class Cursor(object):
         self.ly2.set_xdata(self.x + self.radius)
 
 
+class Sample(object):
+    def __init__(self):
+        self.data = collections.OrderedDict()
+        self.data['genus'] = ''
+        self.data['species'] = ''
+        self.data['subspecies'] = ''
+        self.data['plumreg'] = ''
+        self.data['sex'] = ''
+        self.data['age'] = ''
+        self.data['imgfile'] = ''
+        self.data['imgsrc'] = ''
+        self.data['imgtype'] = ''
+        self.data['x'] = 0
+        self.data['y'] = 0
+        self.data['size'] = 0
+        self.data['rgb_mean'] = [0, 0, 0]
+        self.data['rgb_std'] = [0, 0, 0]
+        self.data['rgb_min'] = [0, 0, 0]
+        self.data['rgb_max'] = [0, 0, 0]
+
+    def get_csv(self):
+        return 'ofoo'
+
+
 class Example(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -80,7 +105,8 @@ class Example(QtGui.QMainWindow):
 
         # self.originalPalette = QtGui.QApplication.palette()
         # QtGui.QApplication.setPalette(self.originalPalette)
-        QtGui.QApplication.setPalette(QtGui.QApplication.style().standardPalette())
+        QtGui.QApplication.setPalette(
+            QtGui.QApplication.style().standardPalette())
         self.init_ui()
 
     def init_ui(self):
@@ -97,28 +123,8 @@ class Example(QtGui.QMainWindow):
         self.files = []
 
         self.data = []
-        self.sample = {
-            'genus': '',
-            'species': '',
-            'subspecies': '',
-        }
 
-        self.taxon = 0
-        self.mean = [0, 0, 0]
-        self.median = [0, 0, 0]
-        self.var = [0, 0, 0]
-        self.std = [0, 0, 0]
-        self.r_min = 0
-        self.r_max = 0
-        self.g_min = 0
-        self.g_max = 0
-        self.b_min = 0
-        self.b_max = 0
-        self.sample_size = 0
-        self.point_x = 0
-        self.point_y = 0
-
-        self.rgb = START_COLOR
+        self.sample = Sample()
 
         plt_vbox = QtGui.QVBoxLayout()
         self.canvas = FigureCanvasQTAgg(self.figure)
@@ -282,10 +288,9 @@ class Example(QtGui.QMainWindow):
     def show_species_dialog(self):
         dlg = SimpleSpeciesDialog(self)
         if dlg.exec_():
-            self.sample['genus'] = dlg.ssp[0]
-            self.sample['species'] = dlg.ssp[1]
-            self.sample['subspecies'] = dlg.ssp[2]
-
+            self.sample.data['genus'] = dlg.ssp[0]
+            self.sample.data['species'] = dlg.ssp[1]
+            self.sample.data['subspecies'] = dlg.ssp[2]
             self.ssp_label.setText(' '.join(dlg.ssp))
 
     def showDialog(self):
@@ -312,8 +317,7 @@ class Example(QtGui.QMainWindow):
             return os.path.basename(self.files[self.file_index])
 
     def insert(self):
-        new_sample = [self.taxon, self.sample_size]
-        self.data.append(map(str, new_sample))
+        print(self.sample.get_csv())
 
     def save(self):
         suggested_file = os.path.join(os.getcwd(), 'test.txt')
@@ -345,22 +349,22 @@ class Example(QtGui.QMainWindow):
         # selected = skimage.color.rgb2lab(selected)
         a, b, _ = selected.shape
         rgbs = selected.reshape((a * b, 3))
-        self.mean = np.mean(rgbs, axis=0)
-        self.median = np.median(rgbs, axis=0)
-        self.var = np.var(rgbs, axis=0)
-        self.std = np.std(rgbs, axis=0)
-        self.rgb = list(map(int, self.mean))
+        self.sample.data['rgb_mean'] = np.mean(rgbs, axis=0)
+        self.sample.data['rgb_std'] = np.std(rgbs, axis=0)
 
-        self.r_min = np.amin(rgbs[:, 0])
-        self.r_max = np.amax(rgbs[:, 0])
-        self.g_min = np.amin(rgbs[:, 1])
-        self.g_max = np.amax(rgbs[:, 1])
-        self.b_min = np.amin(rgbs[:, 2])
-        self.b_max = np.amax(rgbs[:, 2])
+        r_min = np.amin(rgbs[:, 0])
+        g_min = np.amin(rgbs[:, 1])
+        b_min = np.amin(rgbs[:, 2])
+        self.sample.data['rgb_min'] = [r_min, g_min, b_min]
 
-        self.sample_size = (self.cursor.radius * 2) ** 2
-        self.point_x = x
-        self.point_y = y
+        r_max = np.amax(rgbs[:, 0])
+        g_max = np.amax(rgbs[:, 1])
+        b_max = np.amax(rgbs[:, 2])
+        self.sample.data['rgb_max'] = [r_max, g_max, b_max]
+
+        self.sample.data['size'] = (self.cursor.radius * 2) ** 2
+        self.sample.data['x'] = x
+        self.sample.data['y'] = y
         self.update_text()
         self.repaint()
 
@@ -370,17 +374,13 @@ class Example(QtGui.QMainWindow):
     def update_text(self):
         result = ""
         display_items = [
-            ('mean', str(list(map(int, self.mean)))),
-            ('median', str(list(map(int, self.median)))),
-            ('std', str(list(map(int, self.std)))),
-            ('r_min', self.r_min),
-            ('r_max', self.r_max),
-            ('g_min', self.g_min),
-            ('g_max', self.g_max),
-            ('b_min', self.b_min),
-            ('b_max', self.b_max),
-            ('point', '({}, {})'.format(self.point_x, self.point_y)),
-            ('size', self.sample_size),
+            ('mean', str(list(map(int, self.sample.data['rgb_mean'])))),
+            ('std', str(list(map(int, self.sample.data['rgb_std'])))),
+            ('min', str(list(map(int, self.sample.data['rgb_min'])))),
+            ('max', str(list(map(int, self.sample.data['rgb_max'])))),
+            ('size', self.sample.data['size']),
+            ('x', self.sample.data['x']),
+            ('y', self.sample.data['y']),
         ]
         total_w = 33
         for (k, v) in display_items:
@@ -407,7 +407,8 @@ class RenderArea(QtGui.QWidget):
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
-        col = QtGui.QColor(*self.parent.rgb)
+        rgb = list(map(int, self.parent.sample.data['rgb_mean']))
+        col = QtGui.QColor(*rgb)
         qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
 
