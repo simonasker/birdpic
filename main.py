@@ -4,6 +4,7 @@ import sys
 import os
 import csv
 import collections
+import datetime
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -145,8 +146,6 @@ class Example(QtGui.QMainWindow):
         self.cursor = Cursor(self.figure.axes[0])
         self.file_index = 0
         self.files = []
-        # TODO For testing, remove
-        self.files = ['img/tux.png']
 
         self.data = []
 
@@ -357,21 +356,19 @@ class Example(QtGui.QMainWindow):
             return os.path.basename(self.files[self.file_index])
 
     def insert(self):
-        print(self.sample.get_csv_head())
-        print(self.sample.get_csv())
+        self.data.append(self.sample.get_csv())
 
     def save(self):
-        suggested_file = os.path.join(os.getcwd(), 'test.txt')
+        now = datetime.datetime.now().strftime('%y%m%d%H%M')
+        suggested_name = 'diggapippi_{}.csv'.format(now)
+        suggested_file = os.path.join(os.getcwd(), suggested_name)
         file_name = QtGui.QFileDialog.getSaveFileName(
             self, 'Save to file', suggested_file)
 
-        self.col_heads = ['taxon', 'size']
         with open(file_name, 'w') as f:
-            col_heads = ','.join(self.col_heads)
-            f.write('{}\n'.format(col_heads))
+            f.write('{}\n'.format(self.sample.get_csv_head()))
             for d in self.data:
-                sample = ','.join(d)
-                f.write('{}\n'.format(sample))
+                f.write('{}\n'.format(d))
         self.data = []
 
     def on_move(self, event):
