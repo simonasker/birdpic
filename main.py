@@ -109,17 +109,7 @@ class Sample(object):
         return ','.join(map(str, self.data.values()))
 
     def get_display(self):
-        items = [
-            'rgb_mean',
-            'rgb_std',
-            'rgb_min',
-            'rgb_max',
-        ]
-        result = []
-        for item in items:
-            value = 0
-            result.append((item, value))
-        return result
+        return self.data.items()
 
 
 class Example(QtGui.QMainWindow):
