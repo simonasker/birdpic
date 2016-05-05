@@ -96,6 +96,19 @@ class Sample(object):
     def get_csv(self):
         return 'ofoo'
 
+    def get_display(self):
+        items = [
+            'rgb_mean',
+            'rgb_std',
+            'rgb_min',
+            'rgb_max',
+        ]
+        result = []
+        for item in items:
+            value = list(map(lambda x: round(x, 2), self.data[item]))
+            result.append((item, value))
+        return result
+
 
 class Example(QtGui.QMainWindow):
     def __init__(self):
@@ -372,15 +385,7 @@ class Example(QtGui.QMainWindow):
 
     def update_text(self):
         result = ""
-        display_items = [
-            ('mean', self.sample.data['rgb_mean']),
-            ('std', self.sample.data['rgb_std']),
-            ('min', self.sample.data['rgb_min']),
-            ('max', self.sample.data['rgb_max']),
-            ('size', self.sample.data['size']),
-            ('x', self.sample.data['x']),
-            ('y', self.sample.data['y']),
-        ]
+        display_items = self.sample.get_display()
         total_w = 33
         for (k, v) in display_items:
             s = '{}:{:>{}}\n'.format(str(k), str(v), total_w - len(str(k)))
