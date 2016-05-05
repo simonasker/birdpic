@@ -1,0 +1,52 @@
+00,unkno,Unknown region
+01,alula,Alula
+02,aurc,Auriculars
+03,back,Back
+04,bel,Belly
+05,bre,Breast
+06,chin,Chin
+07,col,Collar
+08,cris,Crissum
+09,crw,Crown
+10,fcrw,Forecrown
+11,frhd,Forehead
+12,flnk,Flank
+13,gpc,Greater primary coverts
+14,gsc,Greater secondary coverts
+15,hcrw,Hindcrown
+16,hnck,Hindneck
+17,lbre,Lower breast
+18,lore,Lore
+19,lthr,Lower throat
+20,lwc,Lesser wing (sec) coverts
+21,malar,Malar
+22,mntlb,Mantle base
+23,mntl,Mantle
+24,mwc,Median wing (sec) coverts
+25,nape,Nape
+26,prim,Primaries
+27,rcttp,Rectrices top
+28,rctun,Rectrices under
+29,rem,Remiges (prm & sec) wing
+30,rmp,Rump
+31,scpl,Scapulars
+32,side,Side
+33,sec,Secondaries
+34,sdnck,Sideneck
+35,spcl,Supercilium
+36,thigh,Thigh
+37,thr,Throat
+38,upbre,Upper breast
+39,utcb,Upper tail coverts base
+40,utc,Upper tail coverts
+41,upthr,Upper throat
+42,wrst,Wristedge
+43,beak,Beak
+44,bleg,Betweenlegs
+45,gape,Gape
+46,eyer,Eyering
+47,armpt,Armpit
+48,bksid,Beakside
+49,tail,Tail
+50,manip,Color manipulation
+51,iris,Iris
