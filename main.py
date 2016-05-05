@@ -414,27 +414,24 @@ class SimpleSpeciesDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         main_layout = QtGui.QVBoxLayout()
+        grid = QtGui.QGridLayout()
 
-        genus_hbox = QtGui.QHBoxLayout()
         genus_label = QtGui.QLabel('Genus')
-        genus_hbox.addWidget(genus_label)
+        grid.addWidget(genus_label, 0, 0, QtCore.Qt.AlignRight)
         self.genus_edit = QtGui.QLineEdit()
-        genus_hbox.addWidget(self.genus_edit)
-        main_layout.addLayout(genus_hbox)
+        grid.addWidget(self.genus_edit, 0, 1)
 
-        sp_hbox = QtGui.QHBoxLayout()
         sp_label = QtGui.QLabel('Species')
-        sp_hbox.addWidget(sp_label)
+        grid.addWidget(sp_label, 1, 0, QtCore.Qt.AlignRight)
         self.sp_edit = QtGui.QLineEdit()
-        sp_hbox.addWidget(self.sp_edit)
-        main_layout.addLayout(sp_hbox)
+        grid.addWidget(self.sp_edit, 1, 1)
 
-        ssp_hbox = QtGui.QHBoxLayout()
         ssp_label = QtGui.QLabel('Subspecies')
-        ssp_hbox.addWidget(ssp_label)
+        grid.addWidget(ssp_label, 2, 0, QtCore.Qt.AlignRight)
         self.ssp_edit = QtGui.QLineEdit()
-        ssp_hbox.addWidget(self.ssp_edit)
-        main_layout.addLayout(ssp_hbox)
+        grid.addWidget(self.ssp_edit, 2, 1)
+
+        main_layout.addLayout(grid)
 
         self.button = QtGui.QPushButton('Select')
         self.button.clicked.connect(self.select)
@@ -443,6 +440,7 @@ class SimpleSpeciesDialog(QtGui.QDialog):
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
+        self.setFixedWidth(250)
 
     def select(self):
         self.ssp = (
