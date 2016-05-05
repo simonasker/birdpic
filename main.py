@@ -20,8 +20,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
-
-# import skimage.color
+import skimage.color
 
 SPECIES_FILE = 'data/ploceide_taxon.csv'
 PLUMREG_FILE = 'data/plumreg.csv'
@@ -89,18 +88,18 @@ class Sample(object):
         self.data['x'] = 0
         self.data['y'] = 0
         self.data['size'] = 0
-        self.data['r_mean'] = 0
-        self.data['g_mean'] = 0
-        self.data['b_mean'] = 0
-        self.data['r_std'] = 0
-        self.data['g_std'] = 0
-        self.data['b_std'] = 0
-        self.data['r_min'] = 0
-        self.data['g_min'] = 0
-        self.data['b_min'] = 0
-        self.data['r_max'] = 0
-        self.data['g_max'] = 0
-        self.data['b_max'] = 0
+        self.data['h_mean'] = 0
+        self.data['s_mean'] = 0
+        self.data['v_mean'] = 0
+        self.data['h_std'] = 0
+        self.data['s_std'] = 0
+        self.data['v_std'] = 0
+        self.data['h_min'] = 0
+        self.data['s_min'] = 0
+        self.data['v_min'] = 0
+        self.data['h_max'] = 0
+        self.data['s_max'] = 0
+        self.data['v_max'] = 0
 
     def get_csv_head(self):
         return ','.join(map(str, self.data.keys()))
@@ -140,6 +139,7 @@ class Example(QtGui.QMainWindow):
         self.data = []
 
         self.sample = Sample()
+        self.rgb_mean_demo = [1, 1, 1]
 
         plt_vbox = QtGui.QVBoxLayout()
         self.canvas = FigureCanvasQTAgg(self.figure)
@@ -374,31 +374,34 @@ class Example(QtGui.QMainWindow):
             y1, y2 = y - radius + 2, y + radius + 2
             selected = self.img[y1:y2, x1:x2]
 
-        # selected = skimage.color.rgb2lab(selected)
         a, b, c = selected.shape
-        rgbs = selected.reshape((a * b, c))
+        rgb = selected.reshape((a * b, c))
+        self.rgb_mean_demo = list(np.mean(rgb, axis=0))[:3]
 
-        rgb_mean = list(np.mean(rgbs, axis=0))[:3]
-        rgb_std = list(np.std(rgbs, axis=0))[:3]
-        rgb_min = [np.amin(rgbs[:, i]) for i in range(3)]
-        rgb_max = [np.amax(rgbs[:, i]) for i in range(3)]
+        selected_hsv = skimage.color.rgb2hsv(selected[:, :, :3])
+        a, b, c = selected_hsv.shape
+        hsv = selected_hsv.reshape((a * b, c))
 
-        self.sample.data['r_mean'] = rgb_mean[0]
-        self.sample.data['g_mean'] = rgb_mean[1]
-        self.sample.data['b_mean'] = rgb_mean[2]
+        hsv_mean = list(np.mean(hsv, axis=0))[:3]
+        hsv_std = list(np.std(hsv, axis=0))[:3]
+        hsv_min = [np.amin(hsv[:, i]) for i in range(3)]
+        hsv_max = [np.amax(hsv[:, i]) for i in range(3)]
 
-        self.sample.data['r_std'] = rgb_std[0]
-        self.sample.data['g_std'] = rgb_std[1]
-        self.sample.data['b_std'] = rgb_std[2]
+        self.sample.data['h_mean'] = hsv_mean[0]
+        self.sample.data['s_mean'] = hsv_mean[1]
+        self.sample.data['v_mean'] = hsv_mean[2]
 
-        self.sample.data['r_min'] = rgb_min[0]
-        self.sample.data['g_min'] = rgb_min[1]
-        self.sample.data['b_min'] = rgb_min[2]
+        self.sample.data['h_std'] = hsv_std[0]
+        self.sample.data['s_std'] = hsv_std[1]
+        self.sample.data['v_std'] = hsv_std[2]
 
-        self.sample.data['r_max'] = rgb_max[0]
-        self.sample.data['g_max'] = rgb_max[1]
-        self.sample.data['b_max'] = rgb_max[2]
+        self.sample.data['h_min'] = hsv_min[0]
+        self.sample.data['s_min'] = hsv_min[1]
+        self.sample.data['v_min'] = hsv_min[2]
 
+        self.sample.data['h_max'] = hsv_max[0]
+        self.sample.data['s_max'] = hsv_max[1]
+        self.sample.data['v_max'] = hsv_max[2]
 
         self.sample.data['size'] = (self.cursor.radius * 2) ** 2
         self.sample.data['x'] = x
@@ -439,12 +442,15 @@ class RenderArea(QtGui.QWidget):
         qp.begin(self)
 
         def f(x): return int(x * 255)
-        col = QtGui.QColor(
-            f(self.parent.sample.data['r_mean']),
-            f(self.parent.sample.data['g_mean']),
-            f(self.parent.sample.data['b_mean']),
+        col_rgb = QtGui.QColor(*list(map(f, self.parent.rgb_mean_demo)))
+        col_hsv = QtGui.QColor.fromHsv(
+            self.parent.sample.data['h_mean'] * 359,
+            self.parent.sample.data['s_mean'] * 255,
+            self.parent.sample.data['v_mean'] * 255,
         )
-        qp.fillRect(0, 0, self.width(), self.height(), col)
+        qp.fillRect(0, 0, self.width(), self.height() / 2.0, col_rgb)
+        qp.fillRect(0, self.height() / 2.0, self.width(),
+                    self.height() / 2.0, col_hsv)
         qp.end()
 
 
