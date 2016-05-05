@@ -2,7 +2,6 @@
 
 import sys
 import os
-import csv
 import collections
 import datetime
 
@@ -21,6 +20,8 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import skimage.color
+
+import ioc_parser
 
 SPECIES_FILE = 'data/ploceide_taxon.csv'
 PLUMREG_FILE = 'data/plumreg.csv'
@@ -315,12 +316,11 @@ class Example(QtGui.QMainWindow):
         self.repaint()
 
     def show_species_dialog(self):
-        dlg = SimpleSpeciesDialog(self)
+        dlg = SpeciesDialog(self)
         if dlg.exec_():
-            self.sample.data['genus'] = dlg.ssp[0]
-            self.sample.data['species'] = dlg.ssp[1]
-            self.sample.data['subspecies'] = dlg.ssp[2]
-            self.ssp_label.setText(' '.join(dlg.ssp))
+            self.sample.data['genus'] = dlg.latname.split()[0]
+            self.sample.data['species'] = dlg.latname.split()[1]
+            self.ssp_label.setText(dlg.latname)
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
@@ -499,31 +499,49 @@ class SpeciesDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.headings = [
-            'Taxon ID',
-            'First name',
-            'Last name',
-            'Genus',
-            'Species',
-            'Subspecies',
-            'Taxon Code',
-            'S&A Tax Order',
-            'Crook 64 Order',
+            'Latin name',
+            'English name',
         ]
+
+        self.ioc = ioc_parser.IOC()
 
         self.proxy_model = QtGui.QSortFilterProxyModel()
         self.proxy_model.setDynamicSortFilter(True)
+
+        main_layout = QtGui.QVBoxLayout()
+
+        order_hbox = QtGui.QHBoxLayout()
+        order_label = QtGui.QLabel('order')
+        order_hbox.addWidget(order_label)
+        self.order_box = QtGui.QComboBox()
+        self.order_box.addItem('ALL')
+        for order in self.ioc.get_orders():
+            self.order_box.addItem(order)
+        self.order_box.currentIndexChanged.connect(self.order_changed)
+        order_hbox.addWidget(self.order_box)
+        main_layout.addLayout(order_hbox)
+        self.order = self.order_box.currentText()
+
+        family_hbox = QtGui.QHBoxLayout()
+        family_label = QtGui.QLabel('family')
+        family_hbox.addWidget(family_label)
+        self.family_box = QtGui.QComboBox()
+        self.family_box.addItem('ALL')
+        for family in self.ioc.get_families(order=self.order):
+            self.family_box.addItem(family)
+        self.family_box.currentIndexChanged.connect(self.family_changed)
+        family_hbox.addWidget(self.family_box)
+        main_layout.addLayout(family_hbox)
+        self.family = self.family_box.currentText()
 
         self.create_model()
         self.insert_data()
 
         self.proxy_model.setSourceModel(self.model)
 
-        main_layout = QtGui.QVBoxLayout()
-
         filter_hbox = QtGui.QHBoxLayout()
         filter_label = QtGui.QLabel('Filter')
         filter_hbox.addWidget(filter_label)
-
         self.filter_pattern_edit = QtGui.QLineEdit()
         self.filter_pattern_edit.textChanged.connect(self.filter_changed)
         filter_hbox.addWidget(self.filter_pattern_edit)
@@ -536,11 +554,13 @@ class SpeciesDialog(QtGui.QDialog):
             self.proxy_model.setFilterKeyColumn)
         filter_hbox.addWidget(self.filter_column_box)
 
-        self.list_view = QtGui.QTreeView()
-        self.list_view.setRootIsDecorated(False)
+        self.list_view = QtGui.QTableView()
+        # self.list_view.setRootIsDecorated(False)
         self.list_view.setAlternatingRowColors(True)
         self.list_view.setSortingEnabled(True)
         self.list_view.setModel(self.proxy_model)
+        self.list_view.setColumnWidth(0, 200)
+        self.list_view.setColumnWidth(1, 200)
         self.list_view.doubleClicked.connect(self.select)
         self.list_view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         main_layout.addWidget(self.list_view)
@@ -551,12 +571,30 @@ class SpeciesDialog(QtGui.QDialog):
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
-        self.resize(1000, 500)
+        self.resize(500, 500)
+
+    def order_changed(self, event):
+        self.order = self.order_box.currentText()
+
+        self.family_box.clear()
+        self.family_box.addItem('ALL')
+        for family in self.ioc.get_families(order=self.order):
+            self.family_box.addItem(family)
+
+        self.create_model()
+        self.insert_data()
+        self.proxy_model.setSourceModel(self.model)
+
+    def family_changed(self, event):
+        self.family = self.family_box.currentText()
+        self.create_model()
+        self.insert_data()
+        self.proxy_model.setSourceModel(self.model)
 
     def select(self, event):
         indexes = self.list_view.selectedIndexes()
         if indexes:
-            self.taxon = indexes[0].data()
+            self.latname = indexes[0].data()
             self.accept()
 
     def filter_changed(self):
@@ -570,14 +608,11 @@ class SpeciesDialog(QtGui.QDialog):
             self.model.setHeaderData(i, QtCore.Qt.Horizontal, self.headings[i])
 
     def insert_data(self):
-        with open(SPECIES_FILE, newline='') as csvfile:
-            species = csv.reader(csvfile, delimiter=',')
-            for row in species:
-                self.model.insertRow(0)
-                for i, c in enumerate(row):
-                    if i == 0:
-                        c = int(c)
-                    self.model.setData(self.model.index(0, i), c)
+        species = self.ioc.get_species(order=self.order, family=self.family)
+        for row in species:
+            self.model.insertRow(0)
+            for i, c in enumerate(row):
+                self.model.setData(self.model.index(0, i), c)
 
 
 def main():
