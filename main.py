@@ -96,7 +96,8 @@ class Example(QtGui.QMainWindow):
         self.file_index = 0
         self.files = []
 
-        self.data = {
+        self.data = []
+        self.sample = {
             'genus': '',
             'species': '',
             'subspecies': '',
@@ -281,9 +282,9 @@ class Example(QtGui.QMainWindow):
     def show_species_dialog(self):
         dlg = SimpleSpeciesDialog(self)
         if dlg.exec_():
-            self.data['genus'] = dlg.ssp[0]
-            self.data['species'] = dlg.ssp[1]
-            self.data['subspecies'] = dlg.ssp[2]
+            self.sample['genus'] = dlg.ssp[0]
+            self.sample['species'] = dlg.ssp[1]
+            self.sample['subspecies'] = dlg.ssp[2]
 
             self.ssp_label.setText(' '.join(dlg.ssp))
 
@@ -341,8 +342,7 @@ class Example(QtGui.QMainWindow):
             y1, y2 = y - radius + 2, y + radius + 2
             selected = self.img[y1:y2, x1:x2]
 
-        selected = skimage.color.rgb2lab(selected)
-        # print(selected_hsv)
+        # selected = skimage.color.rgb2lab(selected)
         a, b, _ = selected.shape
         rgbs = selected.reshape((a * b, 3))
         self.mean = np.mean(rgbs, axis=0)
@@ -350,11 +350,6 @@ class Example(QtGui.QMainWindow):
         self.var = np.var(rgbs, axis=0)
         self.std = np.std(rgbs, axis=0)
         self.rgb = list(map(int, self.mean))
-
-        print(self.mean[0] * 359)
-        print(self.mean[1] * 100)
-        print(self.mean[2] * 100)
-        print('=====================')
 
         self.r_min = np.amin(rgbs[:, 0])
         self.r_max = np.amax(rgbs[:, 0])
@@ -374,12 +369,8 @@ class Example(QtGui.QMainWindow):
 
     def update_text(self):
         result = ""
-
-        plumreg_accr = self.plumregs[self.boxes['plumreg'].currentIndex()][0]
         display_items = [
-            ('taxon', self.taxon),
-            ('plumreg', plumreg_accr),
-            ('mean', str(list(self.mean))),
+            ('mean', str(list(map(int, self.mean)))),
             ('median', str(list(map(int, self.median)))),
             ('std', str(list(map(int, self.std)))),
             ('r_min', self.r_min),
@@ -416,8 +407,7 @@ class RenderArea(QtGui.QWidget):
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
-        # col = QtGui.QColor(*self.parent.rgb)
-        col = QtGui.QColor(0, 0, 0)
+        col = QtGui.QColor(*self.parent.rgb)
         qp.fillRect(0, 0, self.width(), self.height(), col)
         qp.end()
 
