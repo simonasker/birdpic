@@ -510,29 +510,28 @@ class SpeciesDialog(QtGui.QDialog):
 
         main_layout = QtGui.QVBoxLayout()
 
-        order_hbox = QtGui.QHBoxLayout()
-        order_label = QtGui.QLabel('order')
-        order_hbox.addWidget(order_label)
+        grid = QtGui.QGridLayout()
+
+        order_label = QtGui.QLabel('Order')
+        grid.addWidget(order_label, 0, 0, QtCore.Qt.AlignRight)
         self.order_box = QtGui.QComboBox()
         self.order_box.addItem('ALL')
         for order in self.ioc.get_orders():
             self.order_box.addItem(order)
         self.order_box.currentIndexChanged.connect(self.order_changed)
-        order_hbox.addWidget(self.order_box)
-        main_layout.addLayout(order_hbox)
+        grid.addWidget(self.order_box, 0, 1)
         self.order = self.order_box.currentText()
 
-        family_hbox = QtGui.QHBoxLayout()
-        family_label = QtGui.QLabel('family')
-        family_hbox.addWidget(family_label)
+        family_label = QtGui.QLabel('Family')
+        grid.addWidget(family_label, 1, 0, QtCore.Qt.AlignRight)
         self.family_box = QtGui.QComboBox()
         self.family_box.addItem('ALL')
         for family in self.ioc.get_families(order=self.order):
             self.family_box.addItem(family)
         self.family_box.currentIndexChanged.connect(self.family_changed)
-        family_hbox.addWidget(self.family_box)
-        main_layout.addLayout(family_hbox)
+        grid.addWidget(self.family_box, 1, 1)
         self.family = self.family_box.currentText()
+        main_layout.addLayout(grid)
 
         self.create_model()
         self.insert_data()
