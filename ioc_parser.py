@@ -43,5 +43,16 @@ class IOC(object):
                     ('{} {}'.format(genus_name, sp_lat_name), sp_eng_name))
         return result
 
-    def get_subspecies(self, species):
-        return ['foo', 'bar']
+    def get_subspecies(self, genus, species):
+        result = []
+        xpath = (
+            './order/family'
+            '/genus[latin_name="{}"]'
+            '/species[latin_name="{}"]'
+            '/subspecies'
+        ).format(genus, species)
+        ssps = self.root_list.findall(xpath)
+        for ssp in ssps:
+            ssp_lat_name = ssp.find('latin_name').text
+            result.append(ssp_lat_name)
+        return result

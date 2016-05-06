@@ -560,9 +560,24 @@ class SpeciesDialog(QtGui.QDialog):
         self.list_view.setModel(self.proxy_model)
         self.list_view.setColumnWidth(0, 200)
         self.list_view.setColumnWidth(1, 200)
-        self.list_view.doubleClicked.connect(self.select)
+        self.list_view.clicked.connect(self.select_species)
         self.list_view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         main_layout.addWidget(self.list_view)
+
+        self.lat_name = 'Amblyospiza albifrons'
+        self.create_ssp_model()
+        self.insert_ssp_data()
+
+        self.ssp_list = QtGui.QTableView()
+        # self.ssp_list.setRootIsDecorated(False)
+        self.ssp_list.setAlternatingRowColors(True)
+        self.ssp_list.setSortingEnabled(True)
+        self.ssp_list.setModel(self.ssp_model)
+        self.ssp_list.setColumnWidth(0, 200)
+        self.ssp_list.setColumnWidth(1, 200)
+        # self.ssp_list.doubleClicked.connect(self.select)
+        self.ssp_list.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        main_layout.addWidget(self.ssp_list)
 
         self.button = QtGui.QPushButton('Select')
         self.button.clicked.connect(self.select)
@@ -590,6 +605,14 @@ class SpeciesDialog(QtGui.QDialog):
         self.insert_data()
         self.proxy_model.setSourceModel(self.model)
 
+    def select_species(self, event):
+        indexes = self.list_view.selectedIndexes()
+        if indexes:
+            self.lat_name = indexes[0].data()
+            self.create_ssp_model()
+            self.insert_ssp_data()
+            self.ssp_list.setModel(self.ssp_model)
+
     def select(self, event):
         indexes = self.list_view.selectedIndexes()
         if indexes:
@@ -605,6 +628,16 @@ class SpeciesDialog(QtGui.QDialog):
         self.model = QtGui.QStandardItemModel(0, len(self.headings), self)
         for i in range(len(self.headings)):
             self.model.setHeaderData(i, QtCore.Qt.Horizontal, self.headings[i])
+
+    def create_ssp_model(self):
+        self.ssp_model = QtGui.QStandardItemModel(0, 1, self)
+        self.ssp_model.setHeaderData(0, QtCore.Qt.Horizontal, 'Name')
+
+    def insert_ssp_data(self):
+        ssps = self.ioc.get_subspecies(*self.lat_name.split())
+        for ssp in ssps:
+            self.ssp_model.insertRow(0)
+            self.ssp_model.setData(self.ssp_model.index(0, 0), ssp)
 
     def insert_data(self):
         species = self.ioc.get_species(order=self.order, family=self.family)
