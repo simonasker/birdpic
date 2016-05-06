@@ -503,6 +503,8 @@ class SpeciesDialog(QtGui.QDialog):
             'English name',
         ]
 
+        self.lat_name = None
+
         self.ioc = ioc_parser.IOC()
 
         self.proxy_model = QtGui.QSortFilterProxyModel()
@@ -554,7 +556,6 @@ class SpeciesDialog(QtGui.QDialog):
         filter_hbox.addWidget(self.filter_column_box)
 
         self.list_view = QtGui.QTableView()
-        # self.list_view.setRootIsDecorated(False)
         self.list_view.setAlternatingRowColors(True)
         self.list_view.setSortingEnabled(True)
         self.list_view.setModel(self.proxy_model)
@@ -564,20 +565,24 @@ class SpeciesDialog(QtGui.QDialog):
         self.list_view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         main_layout.addWidget(self.list_view)
 
-        self.lat_name = 'Amblyospiza albifrons'
         self.create_ssp_model()
         self.insert_ssp_data()
 
+        self.list_view.horizontalHeader().setResizeMode(
+            QtGui.QHeaderView.Stretch)
+        self.list_view.verticalHeader().hide()
+
         self.ssp_list = QtGui.QTableView()
-        # self.ssp_list.setRootIsDecorated(False)
         self.ssp_list.setAlternatingRowColors(True)
         self.ssp_list.setSortingEnabled(True)
         self.ssp_list.setModel(self.ssp_model)
         self.ssp_list.setColumnWidth(0, 200)
         self.ssp_list.setColumnWidth(1, 200)
-        # self.ssp_list.doubleClicked.connect(self.select)
         self.ssp_list.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         main_layout.addWidget(self.ssp_list)
+        self.ssp_list.horizontalHeader().setResizeMode(
+            QtGui.QHeaderView.Stretch)
+        self.ssp_list.verticalHeader().hide()
 
         self.button = QtGui.QPushButton('Select')
         self.button.clicked.connect(self.select)
@@ -585,7 +590,7 @@ class SpeciesDialog(QtGui.QDialog):
         self.setLayout(main_layout)
 
         self.setWindowTitle('Select species')
-        self.resize(500, 500)
+        self.resize(600, 700)
 
     def order_changed(self, event):
         self.order = self.order_box.currentText()
@@ -634,6 +639,8 @@ class SpeciesDialog(QtGui.QDialog):
         self.ssp_model.setHeaderData(0, QtCore.Qt.Horizontal, 'Name')
 
     def insert_ssp_data(self):
+        if self.lat_name is None:
+            return
         ssps = self.ioc.get_subspecies(*self.lat_name.split())
         for ssp in ssps:
             self.ssp_model.insertRow(0)
