@@ -127,7 +127,7 @@ class MainWindow(QtGui.QMainWindow):
     def init_ui(self):
         self.main = QtGui.QWidget()
         self.setCentralWidget(self.main)
-        self.setWindowTitle('Untitled')
+        self.setWindowTitle('DIGBIRD')
         self.statusBar()
 
         self.figure, self.ax = plt.subplots()
@@ -350,7 +350,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def save(self):
         now = datetime.datetime.now().strftime('%y%m%d%H%M')
-        suggested_name = 'diggapippi_{}.csv'.format(now)
+        suggested_name = 'digbird_{}.csv'.format(now)
         suggested_file = os.path.join(os.getcwd(), suggested_name)
         file_name = QtGui.QFileDialog.getSaveFileName(
             self, 'Save to file', suggested_file)
