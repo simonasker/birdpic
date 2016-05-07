@@ -112,7 +112,7 @@ class Sample(object):
         return self.data.items()
 
 
-class Example(QtGui.QMainWindow):
+class MainWindow(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
         styleName = 'Cleanlooks'
@@ -658,8 +658,8 @@ class SpeciesDialog(QtGui.QDialog):
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    ex = Example()
-    ex.show()
+    win = MainWindow()
+    win.show()
     sys.exit(app.exec_())
 
 
