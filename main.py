@@ -83,6 +83,7 @@ class Sample(object):
         self.data['plumreg'] = ''
         self.data['sex'] = ''
         self.data['age'] = ''
+        self.data['colcat'] = ''
         self.data['imgfile'] = ''
         self.data['imgsrc'] = ''
         self.data['imgtype'] = ''
@@ -231,6 +232,8 @@ class MainWindow(QtGui.QMainWindow):
         self.species_group.setLayout(self.species_group_vbox)
         layout.addWidget(self.species_group)
 
+        self.box_group = QtGui.QGroupBox('Parameters')
+        self.box_group_vbox = QtGui.QVBoxLayout()
         grid = QtGui.QGridLayout()
         comboboxes = [
             ('plumreg', 'Plumage region', [n for a, n in self.plumregs]),
@@ -256,6 +259,13 @@ class MainWindow(QtGui.QMainWindow):
                 'Painting',
                 'Photo',
             ]),
+            ('colcat', 'Color Category', [
+                'NC',
+                'Y',
+                'B',
+                'RB',
+                'R',
+            ]),
         ]
         self.boxes = {}
 
@@ -270,7 +280,8 @@ class MainWindow(QtGui.QMainWindow):
             i += 1
         # Initialize the combo box sample fields
         self.combo_change()
-        layout.addLayout(grid)
+        self.box_group.setLayout(grid)
+        layout.addWidget(self.box_group)
 
         self.display_area = QtGui.QTextEdit(self)
         self.display_area.setReadOnly(True)
@@ -300,6 +311,7 @@ class MainWindow(QtGui.QMainWindow):
     def combo_change(self, *args):
         self.sample.data['sex'] = self.boxes['sex'].currentText().lower()
         self.sample.data['age'] = self.boxes['age'].currentText().lower()
+        self.sample.data['colcat'] = self.boxes['colcat'].currentText().lower()
         self.sample.data['imgsrc'] = self.boxes['imgsrc'].currentText().lower()
         self.sample.data['imgtype'] = (
             self.boxes['imgtype'].currentText().lower())
