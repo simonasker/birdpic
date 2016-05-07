@@ -571,6 +571,7 @@ class SpeciesDialog(QtGui.QDialog):
         self.list_view.horizontalHeader().setResizeMode(
             QtGui.QHeaderView.Stretch)
         self.list_view.verticalHeader().hide()
+        self.list_view.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
         self.ssp_list = QtGui.QTableView()
         self.ssp_list.setAlternatingRowColors(True)
@@ -583,6 +584,7 @@ class SpeciesDialog(QtGui.QDialog):
         self.ssp_list.horizontalHeader().setResizeMode(
             QtGui.QHeaderView.Stretch)
         self.ssp_list.verticalHeader().hide()
+        self.ssp_list.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
         self.button = QtGui.QPushButton('Select')
         self.button.clicked.connect(self.select)
