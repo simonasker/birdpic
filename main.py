@@ -319,9 +319,14 @@ class MainWindow(QtGui.QMainWindow):
 
     def show_species_dialog(self):
         if self.species_dlg.exec_():
-            self.sample.data['genus'] = self.species_dlg.latname.split()[0]
-            self.sample.data['species'] = self.species_dlg.latname.split()[1]
-            self.ssp_label.setText(self.species_dlg.latname)
+            self.sample.data['genus'] = self.species_dlg.genus
+            self.sample.data['species'] = self.species_dlg.species
+            self.sample.data['subspecies'] = self.species_dlg.subspecies
+            self.ssp_label.setText('{} {} {}'.format(
+                self.species_dlg.genus,
+                self.species_dlg.species,
+                self.species_dlg.subspecies,
+            ))
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
@@ -463,7 +468,11 @@ class SpeciesDialog(QtGui.QDialog):
             'English name',
         ]
 
-        self.lat_name = None
+        self.order = None
+        self.family = None
+        self.genus = None
+        self.species = None
+        self.subspecies = None
 
         self.ioc = ioc_parser.IOC()
 
@@ -500,6 +509,7 @@ class SpeciesDialog(QtGui.QDialog):
 
         self.proxy_model.setSourceModel(self.model)
 
+        main_layout.addWidget(QtGui.QLabel('Species'))
         filter_hbox = QtGui.QHBoxLayout()
         filter_label = QtGui.QLabel('Filter')
         filter_hbox.addWidget(filter_label)
@@ -533,12 +543,14 @@ class SpeciesDialog(QtGui.QDialog):
         self.list_view.verticalHeader().hide()
         self.list_view.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
+        main_layout.addWidget(QtGui.QLabel('Subspecies'))
         self.ssp_list = QtGui.QTableView()
         self.ssp_list.setAlternatingRowColors(True)
         self.ssp_list.setSortingEnabled(True)
         self.ssp_list.setModel(self.ssp_model)
         self.ssp_list.setColumnWidth(0, 200)
         self.ssp_list.setColumnWidth(1, 200)
+        self.ssp_list.clicked.connect(self.select_subspecies)
         self.ssp_list.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         main_layout.addWidget(self.ssp_list)
         self.ssp_list.horizontalHeader().setResizeMode(
@@ -575,16 +587,19 @@ class SpeciesDialog(QtGui.QDialog):
     def select_species(self, event):
         indexes = self.list_view.selectedIndexes()
         if indexes:
-            self.lat_name = indexes[0].data()
+            self.genus, self.species = indexes[0].data().split()
+            self.subspecies = None
             self.create_ssp_model()
             self.insert_ssp_data()
             self.ssp_list.setModel(self.ssp_model)
 
-    def select(self, event):
-        indexes = self.list_view.selectedIndexes()
+    def select_subspecies(self, event):
+        indexes = self.ssp_list.selectedIndexes()
         if indexes:
-            self.latname = indexes[0].data()
-            self.accept()
+            self.subspecies = indexes[0].data()
+
+    def select(self, event):
+        self.accept()
 
     def filter_changed(self):
         pattern = self.filter_pattern_edit.text()
@@ -601,9 +616,9 @@ class SpeciesDialog(QtGui.QDialog):
         self.ssp_model.setHeaderData(0, QtCore.Qt.Horizontal, 'Name')
 
     def insert_ssp_data(self):
-        if self.lat_name is None:
+        if self.species is None:
             return
-        ssps = self.ioc.get_subspecies(*self.lat_name.split())
+        ssps = self.ioc.get_subspecies(self.genus, self.species)
         for ssp in ssps:
             self.ssp_model.insertRow(0)
             self.ssp_model.setData(self.ssp_model.index(0, 0), ssp)
