@@ -454,47 +454,6 @@ class RenderArea(QtGui.QWidget):
         qp.end()
 
 
-class SimpleSpeciesDialog(QtGui.QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        main_layout = QtGui.QVBoxLayout()
-        grid = QtGui.QGridLayout()
-
-        genus_label = QtGui.QLabel('Genus')
-        grid.addWidget(genus_label, 0, 0, QtCore.Qt.AlignRight)
-        self.genus_edit = QtGui.QLineEdit()
-        grid.addWidget(self.genus_edit, 0, 1)
-
-        sp_label = QtGui.QLabel('Species')
-        grid.addWidget(sp_label, 1, 0, QtCore.Qt.AlignRight)
-        self.sp_edit = QtGui.QLineEdit()
-        grid.addWidget(self.sp_edit, 1, 1)
-
-        ssp_label = QtGui.QLabel('Subspecies')
-        grid.addWidget(ssp_label, 2, 0, QtCore.Qt.AlignRight)
-        self.ssp_edit = QtGui.QLineEdit()
-        grid.addWidget(self.ssp_edit, 2, 1)
-
-        main_layout.addLayout(grid)
-
-        self.button = QtGui.QPushButton('Select')
-        self.button.clicked.connect(self.select)
-        main_layout.addWidget(self.button)
-
-        self.setLayout(main_layout)
-
-        self.setWindowTitle('Select species')
-        self.setFixedWidth(250)
-
-    def select(self):
-        self.ssp = (
-            self.genus_edit.text(),
-            self.sp_edit.text(),
-            self.ssp_edit.text(),
-        )
-        self.accept()
-
-
 class SpeciesDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
