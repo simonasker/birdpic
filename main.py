@@ -159,6 +159,8 @@ class MainWindow(QtGui.QMainWindow):
         main_hbox.addLayout(plt_vbox)
         main_hbox.addLayout(side_panel_vbox)
 
+        self.species_dlg = SpeciesDialog(self)
+
         self.main.setLayout(main_hbox)
         self.connect_mouse_events()
 
@@ -316,11 +318,10 @@ class MainWindow(QtGui.QMainWindow):
         self.repaint()
 
     def show_species_dialog(self):
-        dlg = SpeciesDialog(self)
-        if dlg.exec_():
-            self.sample.data['genus'] = dlg.latname.split()[0]
-            self.sample.data['species'] = dlg.latname.split()[1]
-            self.ssp_label.setText(dlg.latname)
+        if self.species_dlg.exec_():
+            self.sample.data['genus'] = self.species_dlg.latname.split()[0]
+            self.sample.data['species'] = self.species_dlg.latname.split()[1]
+            self.ssp_label.setText(self.species_dlg.latname)
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
