@@ -110,7 +110,27 @@ class Sample(object):
         return ','.join(map(str, self.data.values()))
 
     def get_display(self):
-        return self.data.items()
+        result = []
+        display_items = [
+            'x',
+            'y',
+            'size',
+            'h_mean',
+            's_mean',
+            'v_mean',
+            'h_std',
+            's_std',
+            'v_std',
+            'h_min',
+            's_min',
+            'v_min',
+            'h_max',
+            's_max',
+            'v_max',
+        ]
+        for i in display_items:
+            result.append((i, self.data.get(i)))
+        return result
 
 
 class MainWindow(QtGui.QMainWindow):
