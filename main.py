@@ -239,7 +239,7 @@ class MainWindow(QtGui.QMainWindow):
         self.file_label = QtGui.QLabel('')
         layout.addWidget(self.file_label)
 
-        self.species_group = QtGui.QGroupBox('Species')
+        self.species_group = QtGui.QGroupBox()
         self.species_group_vbox = QtGui.QVBoxLayout()
 
         self.ssp_label = QtGui.QLabel('No species selected')
@@ -252,7 +252,7 @@ class MainWindow(QtGui.QMainWindow):
         self.species_group.setLayout(self.species_group_vbox)
         layout.addWidget(self.species_group)
 
-        self.box_group = QtGui.QGroupBox('Parameters')
+        self.box_group = QtGui.QGroupBox()
         self.box_group_vbox = QtGui.QVBoxLayout()
         grid = QtGui.QGridLayout()
         comboboxes = [
