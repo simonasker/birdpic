@@ -453,7 +453,7 @@ class RenderArea(QtGui.QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setFixedSize(200, 50)
+        self.setFixedSize(300, 50)
 
     def paintEvent(self, event):
         qp = QtGui.QPainter()
@@ -461,14 +461,7 @@ class RenderArea(QtGui.QWidget):
 
         def f(x): return int(x * 255)
         col_rgb = QtGui.QColor(*list(map(f, self.parent.rgb_mean_demo)))
-        col_hsv = QtGui.QColor.fromHsv(
-            self.parent.sample.data['h_mean'] * 359,
-            self.parent.sample.data['s_mean'] * 255,
-            self.parent.sample.data['v_mean'] * 255,
-        )
-        qp.fillRect(0, 0, self.width(), self.height() / 2.0, col_rgb)
-        qp.fillRect(0, self.height() / 2.0, self.width(),
-                    self.height() / 2.0, col_hsv)
+        qp.fillRect(0, 0, self.width(), self.height(), col_rgb)
         qp.end()
 
 
