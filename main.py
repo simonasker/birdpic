@@ -420,10 +420,10 @@ class MainWindow(QtGui.QMainWindow):
         a, b, c = selected_hsv.shape
         hsv = selected_hsv.reshape((a * b, c))
 
-        hsv_mean = list(np.mean(hsv, axis=0))[:3]
-        hsv_std = list(np.std(hsv, axis=0))[:3]
-        hsv_min = [np.amin(hsv[:, i]) for i in range(3)]
-        hsv_max = [np.amax(hsv[:, i]) for i in range(3)]
+        hsv_mean = np.around(list(np.mean(hsv, axis=0))[:3], decimals=2)
+        hsv_std = np.around(list(np.std(hsv, axis=0))[:3], decimals=2)
+        hsv_min = np.around([np.amin(hsv[:, i]) for i in range(3)], decimals=2)
+        hsv_max = np.around([np.amax(hsv[:, i]) for i in range(3)], decimals=2)
 
         self.sample.data['h_mean'] = hsv_mean[0]
         self.sample.data['s_mean'] = hsv_mean[1]
