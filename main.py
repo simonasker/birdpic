@@ -354,10 +354,12 @@ class MainWindow(QtGui.QMainWindow):
             self.sample.data['genus'] = self.species_dlg.genus
             self.sample.data['species'] = self.species_dlg.species
             self.sample.data['subspecies'] = self.species_dlg.subspecies
+            if self.sample.data['subspecies'] is None:
+                self.sample.data['subspecies'] = 'ssp'
             self.ssp_label.setText('{} {} {}'.format(
-                self.species_dlg.genus,
-                self.species_dlg.species,
-                self.species_dlg.subspecies,
+                self.sample.data['genus'],
+                self.sample.data['species'],
+                self.sample.data['subspecies'],
             ))
 
     def showDialog(self):
