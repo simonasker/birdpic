@@ -151,6 +151,9 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('DIGBIRD')
         self.statusBar()
 
+        self.load_dir = os.path.expanduser('~/Desktop')
+        self.save_dir = os.path.expanduser('~/Desktop')
+
         self.figure, self.ax = plt.subplots()
         self.ax.get_xaxis().set_visible(False)
         self.ax.get_yaxis().set_visible(False)
@@ -364,7 +367,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
-            self, 'Open file', os.getcwd(), '*.jpg *.png')
+            self, 'Open file', self.load_dir, '*.jpg *.png')
         # TODO Do some error checking here
         self.file_index = 0
         self.reset_figure()
@@ -391,7 +394,7 @@ class MainWindow(QtGui.QMainWindow):
     def save(self):
         now = datetime.datetime.now().strftime('%y%m%d%H%M')
         suggested_name = 'digbird_{}.csv'.format(now)
-        suggested_file = os.path.join(os.getcwd(), suggested_name)
+        suggested_file = os.path.join(self.save_dir, suggested_name)
         file_name = QtGui.QFileDialog.getSaveFileName(
             self, 'Save to file', suggested_file)
 
