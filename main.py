@@ -368,6 +368,7 @@ class MainWindow(QtGui.QMainWindow):
     def showDialog(self):
         self.files = QtGui.QFileDialog.getOpenFileNames(
             self, 'Open file', self.load_dir, '*.jpg *.png')
+        self.load_dir = os.path.dirname(self.files[0])
         # TODO Do some error checking here
         self.file_index = 0
         self.reset_figure()
@@ -397,6 +398,7 @@ class MainWindow(QtGui.QMainWindow):
         suggested_file = os.path.join(self.save_dir, suggested_name)
         file_name = QtGui.QFileDialog.getSaveFileName(
             self, 'Save to file', suggested_file)
+        self.save_dir = os.path.dirname(file_name)
 
         with open(file_name, 'w') as f:
             f.write('{}\n'.format(self.sample.get_csv_head()))
